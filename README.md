@@ -1,20 +1,20 @@
 # mlvagrant
 
-Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant][https://www.vagrantup.com/] and [VirtualBox][https://www.virtualbox.org/].
+Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
 By default these scripts create 3 'chef/centos-6.5' Vagrant vms, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and vms. MarkLogic 7.0-4 (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. MLCP, Zip/Unzip, Nodejs, Gulp, Forever, and Git will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
 
-Credits to [@peetkes][https://github.com/peetkes] for giving me a head start with this.
+Credits to [@peetkes](https://github.com/peetkes) for giving me a head start with this.
 
 ## Getting started
 
 You first need to download and install prerequisites and mlvagrant itself:
 
-- Download and install [VirtualBox][https://www.virtualbox.org/wiki/Downloads]
-- Download and install [Vagrant][https://www.vagrantup.com/downloads.html]
+- Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+- Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Create /space/software (`sudo mkdir -p /space/software`)
-- Download [MarkLogic 7.0-4 for CentOS][http://developer.marklogic.com/download/binaries/7.0/MarkLogic-7.0-4.x86_64.rpm]
-- Download [MLCP 1.2.1 binaries][http://developer.marklogic.com/download/binaries/mlcp/mlcp-Hadoop1-1.2-1-bin.zip]
+- Download [MarkLogic 7.0-4 for CentOS](http://developer.marklogic.com/download/binaries/7.0/MarkLogic-7.0-4.x86_64.rpm)
+- Download [MLCP 1.2.1 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-Hadoop1-1.2-1-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
 - Download mlvagrant (`git clone git@github.com:grtjn/mlvagrant.git`)
 - Create /opt/vagrant (`sudo mkdir -p /opt/vagrant`)
