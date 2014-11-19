@@ -10,7 +10,6 @@ mkdir -p /space/projects/$1.git
 # initialize the git repo
 cd /space/projects/$1.git
 if [ ! -f HEAD ]; then
-    chmod g+s .
     git --bare init
 fi
 if [ ! -f hooks/post-receive ]; then
@@ -25,5 +24,7 @@ mkdir -p /space/projects/$1.live
 cd /space/projects
 chown -R $1:sshuser $1.git
 chown -R $1:sshuser $1.live
+chmod g+s $1.git
+chmod g+s $1.live
 chmod -R g+rw $1.git
 chmod -R g+rw $1.live
