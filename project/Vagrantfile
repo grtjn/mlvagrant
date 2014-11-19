@@ -47,6 +47,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         (ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)) && ip[1]
     end
     
+    # Customize the virtual machine environments
+    config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+        vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
+        #vb.gui = true # for debugging
+    end
+    
     config.vm.define mastername do |master|
         master.vm.box = "chef/centos-6.5"
         master.vm.provider "virtualbox" do |v|
