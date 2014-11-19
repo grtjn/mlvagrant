@@ -13,7 +13,7 @@ if [ ! -f HEAD ]; then
     git --bare init
 fi
 if [ ! -f hooks/post-receive ]; then
-    printf "#!/bin/sh\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f master\n" > hooks/post-receive
+    printf "#!/bin/sh\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f master\nchown -R :sshuser /space/projects/$1.live\nchmod -R g+rw /space/projects/$1.live\n" > hooks/post-receive
     chmod 755 hooks/post-receive
 fi
 
