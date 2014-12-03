@@ -2,7 +2,7 @@
 
 Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
-By default these scripts create 3 'chef/centos-6.5' Vagrant vms, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and vms. MarkLogic 7.0-4 (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. MLCP, Zip/Unzip, Nodejs, Gulp, Forever, and Git will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
+By default these scripts create 3 'chef/centos-6.5' Vagrant vms, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and vms. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. MLCP, Zip/Unzip, Nodejs, Gulp, Forever, and Git will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
 
 Each VM takes roughly 2.5Gb. The VM template, together with 3 VMs will take about 10Gb of disk space. In addition, each VM that is launched will claim 2Gb of RAM, and 2 CPU cores. Make sure you have sufficient resources!
 
@@ -15,8 +15,8 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Create /space/software (`sudo mkdir -p /space/software`)
-- Download [MarkLogic 7.0-4 for CentOS](http://developer.marklogic.com/download/binaries/7.0/MarkLogic-7.0-4.x86_64.rpm) (go to http://developer.marklogic.com first, login, then open the download url)
-- Download [MLCP 1.2.1 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-Hadoop1-1.2-1-bin.zip)
+- Download [MarkLogic 7.0-4.1 for CentOS](http://developer.marklogic.com/products) (login required)
+- Download [MLCP 1.2-3 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-Hadoop1-1.2-3-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
 - Download mlvagrant (`git clone https://github.com/grtjn/mlvagrant.git`)
 - Create /opt/vagrant (`sudo mkdir -p /opt/vagrant`)

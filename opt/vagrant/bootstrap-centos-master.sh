@@ -1,8 +1,13 @@
 #! /bin/sh
 echo "running $0 $@"
-sudo /opt/vagrant/install-ml-CentOS.sh $2
-sudo /opt/vagrant/setup-ml-master.sh $1 $2
-sudo /opt/vagrant/install-node.sh
-sudo /opt/vagrant/install-mlcp.sh
-sudo /opt/vagrant/install-user.sh $3
-sudo /opt/vagrant/setup-git.sh $3
+if [ -d /opt/vagrant ]; then
+    cd /opt/vagrant
+fi
+sudo restore-yum-cache.sh
+sudo install-ml-CentOS.sh $2
+sudo setup-ml-master.sh $1 $2
+sudo install-node.sh
+sudo install-mlcp.sh
+sudo install-user.sh $3
+sudo setup-git.sh $3
+sudo backup-yum-cache.sh
