@@ -1,6 +1,10 @@
 #! /bin/sh
 echo "running $0 $@"
 
+# TODO: Apply recommended page settings
+#echo 320 > /proc/sys/vm/nr_hugepages
+#echo "transparent_hugepage=never" >> /etc/grub.conf
+
 # Install dependencies required by MarkLogic and hostmanager
 yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64 avahi avahi-tools nss-mdns nmap
 

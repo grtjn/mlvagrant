@@ -74,19 +74,147 @@ else
 fi
 JOINING_HOST=$1
 
-echo "VERSION is ${VERSION}"
+source /opt/vagrant/ml_${VERSION}_license.properties
+
 echo "BOOTSTRAP_HOST is ${BOOTSTRAP_HOST}"
 echo "JOINING_HOST is ${JOINING_HOST}"
+echo "VERSION is ${VERSION}"
+echo "USER is ${USER}"
+echo "LICENSEE is ${LICENSEE}"
 
-
-# Curl command for all requests. Suppress progress meter (-s), 
-# but still show errors (-S)
+# Suppress progress meter, but still show errors
 CURL="curl -s -S"
-# Curl command when authentication is required, after security
-# is initialized.
+#for debugging:
+#CURL="curl -v"
+
+# Add authentication related options, required once security is initialized
 AUTH_CURL="${CURL} --${AUTH_MODE} --user ${USER}:${PASS}"
 
+if [ "$VERSION" -eq "6" ]; then
+	
+	yum -y install recode
+	
+	echo Uploading license..
+	$CURL -i -X POST \
+	    --data-urlencode "license-key=$LICENSE" \
+	    --data-urlencode "licensee=$LICENSEE" \
+	    --data-urlencode "ok=ok" \
+	    http://${JOINING_HOST}:8001/license-go.xqy
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
 
+	echo Agreeing license..
+	$CURL -i -X GET \
+	    http://${JOINING_HOST}:8001/agree.xqy > agree.html
+	LOCATION=`grep "Location:" agree.html \
+		| perl -p -e 's/^.*?Location:\s+([^\r\n\s]+).*/$1/'`
+	echo "'$LOCATION'"
+	
+	$CURL -o "agree.html" -i -X GET \
+	    http://${JOINING_HOST}:8001/$LOCATION
+	AGREE=`grep "accepted-agreement" agree.html \
+		| sed 's%^.*value="\([^"]*\)".*$%\1%'`
+	
+	echo "AGREEMENT is $AGREE"
+	$CURL -X POST \
+	    --data-urlencode "accepted-agreement=$AGREE" \
+	    --data-urlencode "ok=ok" \
+	    http://${JOINING_HOST}:8001/agree-go.xqy
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
+	
+	echo Initializing services..
+	$CURL -X POST \
+	    --data-urlencode "ok=ok" \
+	    http://${JOINING_HOST}:8001/initialize-go.xqy
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
+	
+	echo Joining cluster..
+	$CURL -o "join-admin.html" -X GET \
+	    http://${JOINING_HOST}:8001/join-admin.xqy
+	HOSTID=`grep "new-server-host-id" join-admin.html \
+		| sed 's%^.*value="\([^"]*\)".*$%\1%'`
+	SSL=`grep "ssl-certificate" join-admin.html \
+		| sed 's%^.*value="\([^"]*\)".*$%\1%'`
+	
+	echo $HOSTID
+	#echo $SSL
+	
+	$CURL -i -X POST \
+	    --data-urlencode "new-server=$JOINING_HOST" \
+	    --data-urlencode "new-server-port=8001" \
+	    --data-urlencode "bind=7999" \
+	    --data-urlencode "connect=7999" \
+	    --data-urlencode "foreign-bind=7998" \
+	    --data-urlencode "foreign-connect=7998" \
+	    --data-urlencode "new-server-host-id=$HOSTID" \
+	    --data-urlencode "ssl-certificate=$SSL" \
+	    --data-urlencode "server=$BOOTSTRAP_HOST" \
+	    --data-urlencode "port=8001" \
+	    --data-urlencode "protocol=http" \
+	    --data-urlencode "ok=ok" \
+	    http://${JOINING_HOST}:8001/join-admin-go.xqy > join-admin.html
+	LOCATION=`grep "Location:" join-admin.html \
+		| perl -p -e 's/^.*?Location:\s+([^\r\n\s]+).*/$1/'`
+	echo "'$LOCATION'"
+	
+	$AUTH_CURL -o joiner.html -X GET $LOCATION
+	GROUP=`grep "<option" joiner.html \
+		| sed 's%^.*value="\([^"]*\)".*$%\1%'`
+	echo $GROUP
+	
+	$AUTH_CURL -i -X POST \
+	    --data-urlencode "bind=7999" \
+	    --data-urlencode "connect=7999" \
+	    --data-urlencode "foreign-bind=7998" \
+	    --data-urlencode "foreign-connect=7998" \
+	    --data-urlencode "port=8001" \
+	    --data-urlencode "joiner-host-id=$HOSTID" \
+		--data-urlencode "joiner-admin-host=${JOINING_HOST}:8001" \
+	    --data-urlencode "ssl-certificate=$SSL" \
+	    --data-urlencode "protocol=http" \
+	    --data-urlencode "group=$GROUP" \
+	    --data-urlencode "joiner=${JOINING_HOST}" \
+	    --data-urlencode "ok=ok" \
+		http://${BOOTSTRAP_HOST}:8001/accept-joiner-go.xqy > accepted.html
+	LOCATION=`grep "Location:" accepted.html \
+		| perl -p -e 's/^.*?Location:\s+([^\r\n\s]+).*/$1/'`
+	echo "'$LOCATION'"
+	
+	$AUTH_CURL -o configs.html -X GET http://${BOOTSTRAP_HOST}:8001/$LOCATION
+	grep assignmentsFile configs.html | sed 's%^.*value="\([^"]*\)".*$%\1%' | recode html..ascii > assigns.xml
+	grep databasesFile configs.html | sed 's%^.*value="\([^"]*\)".*$%\1%' | recode html..ascii > databases.xml
+	grep groupsFile configs.html | sed 's%^.*value="\([^"]*\)".*$%\1%' | recode html..ascii > groups.xml
+	grep hostsFile configs.html | sed 's%^.*value="\([^"]*\)".*$%\1%' | recode html..ascii > hosts.xml
+	grep clustersFile configs.html | sed 's%^.*value="\([^"]*\)".*$%\1%' | recode html..ascii > clusters.xml
+	grep mimetypesFile configs.html | sed 's%^.*value="\([^"]*\)".*$%\1%' | recode html..ascii > mimes.xml
+
+	$CURL -X POST \
+	    --data-urlencode "assignmentsFile@assigns.xml" \
+	    --data-urlencode "databasesFile@databases.xml" \
+	    --data-urlencode "groupsFile@groups.xml" \
+	    --data-urlencode "hostsFile@hosts.xml" \
+	    --data-urlencode "clustersFile@clusters.xml" \
+	    --data-urlencode "mimetypesFile@mimes.xml" \
+	    --data-urlencode "protocol=http" \
+	    --data-urlencode "ok=ok" \
+	    http://${JOINING_HOST}:8001/receive-config-go.xqy
+
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
+	
+	mkdir /vagrant/${JOINING_HOST}
+	cp *.html /vagrant/${JOINING_HOST}/
+	cp *.xml /vagrant/${JOINING_HOST}/
+	rm *.html
+    rm *.xml
+else
+	
 #######################################################
 # Add one or more hosts to a cluster. For each host joining
 # the cluster:
@@ -143,5 +271,6 @@ AUTH_CURL="${CURL} --${AUTH_MODE} --user ${USER}:${PASS}"
 #  restart_check $JOINING_HOST $TIMESTAMP $LINENO
   
   rm ./cluster-config.zip
+fi
 
-  echo "...$JOINING_HOST successfully added to the cluster."
+echo "...$JOINING_HOST successfully added to the cluster."

@@ -70,50 +70,111 @@ if [ $# -ge 1 ]; then
   BOOTSTRAP_HOST=$1
   shift
 fi
-echo "VERSION is ${VERSION}"
-echo "BOOTSTRAP_HOST is ${BOOTSTRAP_HOST}"
 
 source /opt/vagrant/ml_${VERSION}_license.properties
 
+echo "BOOTSTRAP_HOST is ${BOOTSTRAP_HOST}"
+echo "VERSION is ${VERSION}"
+echo "USER is ${USER}"
+echo "LICENSEE is ${LICENSEE}"
 
 # Suppress progress meter, but still show errors
 CURL="curl -s -S"
+#for debugging:
+#CURL="curl -v"
+
 # Add authentication related options, required once security is initialized
 AUTH_CURL="${CURL} --${AUTH_MODE} --user ${USER}:${PASS}"
 
+if [ "$VERSION" -eq "6" ]; then
+	
+	echo Uploading license..
+	$CURL -i -X POST \
+	    --data-urlencode "license-key=$LICENSE" \
+	    --data-urlencode "licensee=$LICENSEE" \
+	    --data-urlencode "ok=ok" \
+	    http://${BOOTSTRAP_HOST}:8001/license-go.xqy
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
 
-#######################################################
-# Bring up the first (or only) host in the cluster. The following
-# requests are sent to the target host:
-#   (1) POST /admin/v1/init
-#   (2) POST /admin/v1/instance-admin?admin-user=X&admin-password=Y&realm=Z
-# GET /admin/v1/timestamp is used to confirm restarts.
+	echo Agreeing license..
+	$CURL -i -X GET \
+	    http://${BOOTSTRAP_HOST}:8001/agree.xqy > agree.html
+	LOCATION=`grep "Location:" agree.html \
+		| perl -p -e 's/^.*?Location:\s+([^\r\n\s]+).*/$1/'`
+	echo "'$LOCATION'"
+	
+	$CURL -o "agree.html" -X GET \
+	    "http://${BOOTSTRAP_HOST}:8001/${LOCATION}"
+	AGREE=`grep "accepted-agreement" agree.html \
+		| sed 's%^.*value="\(.*\)".*$%\1%'`
+	
+	echo "AGREEMENT is $AGREE"
+	$CURL -X POST \
+	    --data-urlencode "accepted-agreement=$AGREE" \
+	    --data-urlencode "ok=ok" \
+	    http://${BOOTSTRAP_HOST}:8001/agree-go.xqy
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
+	
+	echo Initializing services..
+	$CURL -X POST \
+	    --data-urlencode "ok=ok" \
+	    http://${BOOTSTRAP_HOST}:8001/initialize-go.xqy
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
+	
+	echo Initializing security..
+	$CURL -X POST \
+	    --data-urlencode "user=$USER" \
+	    --data-urlencode "password1=$PASS" \
+	    --data-urlencode "password2=$PASS" \
+	    --data-urlencode "realm=$SEC_REALM" \
+	    --data-urlencode "ok=ok" \
+	    http://${BOOTSTRAP_HOST}:8001/security-install-go.xqy
+	service MarkLogic restart
+	echo "Waiting for server restart.."
+	sleep 5
+	
+	rm *.html
+else
+	
+	#######################################################
+	# Bring up the first (or only) host in the cluster. The following
+	# requests are sent to the target host:
+	#   (1) POST /admin/v1/init
+	#   (2) POST /admin/v1/instance-admin?admin-user=X&admin-password=Y&realm=Z
+	# GET /admin/v1/timestamp is used to confirm restarts.
 
-# (1) Initialize the server
-echo "Initializing $BOOTSTRAP_HOST and setting license..."
-$CURL -X POST -H "Content-type=application/x-www-form-urlencoded" \
-    --data-urlencode "license-key=$LICENSE" \
-    --data-urlencode "licensee=$LICENSEE" \
-    http://${BOOTSTRAP_HOST}:8001/admin/v1/init
-sleep 10
+	# (1) Initialize the server
+	echo "Initializing $BOOTSTRAP_HOST and setting license..."
+	$CURL -X POST -H "Content-type=application/x-www-form-urlencoded" \
+	    --data-urlencode "license-key=$LICENSE" \
+	    --data-urlencode "licensee=$LICENSEE" \
+	    http://${BOOTSTRAP_HOST}:8001/admin/v1/init
+	sleep 10
 
-# (2) Initialize security and, optionally, licensing. Capture the last
-#     restart timestamp and use it to check for successful restart.
-echo "Initializing security for $BOOTSTRAP_HOST..."
-TIMESTAMP=`$CURL -X POST \
-   -H "Content-type: application/x-www-form-urlencoded" \
-   --data "admin-username=${USER}" --data "admin-password=${PASS}" \
-   --data "realm=${SEC_REALM}" \
-   http://${BOOTSTRAP_HOST}:8001/admin/v1/instance-admin \
-   | grep "last-startup" \
-   | sed 's%^.*<last-startup.*>\(.*\)</last-startup>.*$%\1%'`
-if [ "$TIMESTAMP" == "" ]; then
-  echo "ERROR: Failed to get instance-admin timestamp." >&2
-  exit 1
+	# (2) Initialize security and, optionally, licensing. Capture the last
+	#     restart timestamp and use it to check for successful restart.
+	echo "Initializing security for $BOOTSTRAP_HOST..."
+	TIMESTAMP=`$CURL -X POST \
+	   -H "Content-type: application/x-www-form-urlencoded" \
+	   --data "admin-username=${USER}" --data "admin-password=${PASS}" \
+	   --data "realm=${SEC_REALM}" \
+	   http://${BOOTSTRAP_HOST}:8001/admin/v1/instance-admin \
+	   | grep "last-startup" \
+	   | sed 's%^.*<last-startup.*>\(.*\)</last-startup>.*$%\1%'`
+	if [ "$TIMESTAMP" == "" ]; then
+	  echo "ERROR: Failed to get instance-admin timestamp." >&2
+	  exit 1
+	fi
+
+	# Test for successful restart
+	restart_check $BOOTSTRAP_HOST $TIMESTAMP $LINENO
 fi
-
-# Test for successful restart
-restart_check $BOOTSTRAP_HOST $TIMESTAMP $LINENO
 
 echo "Initialization complete for $BOOTSTRAP_HOST..."
 exit 0
