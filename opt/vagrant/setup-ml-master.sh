@@ -86,7 +86,7 @@ CURL="curl -s -S"
 # Add authentication related options, required once security is initialized
 AUTH_CURL="${CURL} --${AUTH_MODE} --user ${USER}:${PASS}"
 
-if [ "$VERSION" -eq "6" ]; then
+if [ "$VERSION" -eq "5" ] || [ "$VERSION" -eq "6" ]; then
 	
 	echo Uploading license..
 	$CURL -i -X POST \
@@ -175,6 +175,28 @@ else
 	# Test for successful restart
 	restart_check $BOOTSTRAP_HOST $TIMESTAMP $LINENO
 fi
+
+echo "Removing network suffix from hostname"
+
+$AUTH_CURL -o "hosts.html" -X GET \
+    "http://${BOOTSTRAP_HOST}:8001/host-summary.xqy?section=host"
+HOST_ID=`grep "statusfirstcell" hosts.html \
+	| grep ${BOOTSTRAP_HOST} \
+	| sed 's%^.*href="host-admin.xqy?section=host&amp;host=\([^"]*\)".*$%\1%'`
+echo "HOST_ID is $HOST_ID"
+
+$AUTH_CURL -X POST \
+	--data-urlencode "host=$HOST_ID" \
+	--data-urlencode "section=host" \
+	--data-urlencode "/ho:hosts/ho:host/ho:host-name=${BOOTSTRAP_HOST}" \
+	--data-urlencode "ok=ok" \
+	"http://${BOOTSTRAP_HOST}:8001/host-admin-go.xqy"
+
+service MarkLogic restart
+echo "Waiting for server restart.."
+sleep 5
+
+rm *.html
 
 echo "Initialization complete for $BOOTSTRAP_HOST..."
 exit 0

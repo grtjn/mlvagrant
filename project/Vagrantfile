@@ -4,31 +4,38 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-def find_arg(args = [])
-  args.each do |arg|
-    ARGV.each do |a|
-      if a == arg || a.match("^#{arg}=")
-        index = ARGV.index(a)
-        ARGV.slice!(index)
-
-        return arg if a == arg
-
-        if arg.match("^--")
-          split = a.split '='
-          return a.split("=")[1] if split.length == 2
-          return arg
+def load_properties(properties_filename, prefix = "")
+  properties = {}
+  
+  if File.exists? properties_filename
+    File.open(properties_filename, 'r') do |properties_file|
+      properties_file.read.each_line do |line|
+        line.strip!
+        if (line[0] != ?#) && (line[0] != ?=) && (line[0] != "")
+          i = line.index('=')
+          if i
+            key = prefix + line[0..i - 1].strip
+            value = line[i + 1..-1].strip
+            properties[key] = value
+          end
         end
       end
     end
+  else
+    puts "WARN: Properties file #{properties_filename} not found.."
   end
-  nil
+
+  properties
 end
 
-@ml_version = find_arg(["-v","--ml-version"]) || "7"
-@nr_hosts = (find_arg(["-n","--nr-hosts"]) || "3").to_i
+@properties = load_properties("project.properties")
+@ml_version = ENV['ML_VERSION'] || @properties['ML_VERSION'] || "7"
+@nr_hosts = (ENV['NR_HOSTS'] || @properties['NR_HOSTS'] || "3").to_i
+puts "ml-version=#{@ml_version}"
+puts "nr-hosts=#{@nr_hosts}"
 
 def get_vm_name(i)
-  File.basename(Dir.getwd) + "-v" + @ml_version  + "-ml" + i.to_s
+  File.basename(Dir.getwd) + "-ml" + i.to_s
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -67,7 +74,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         master.vm.synced_folder "/space/software", "/space/software"
         
         master.vm.provision :hostmanager
-        master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", File.basename(Dir.getwd)]
+        master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, File.basename(Dir.getwd)]
     end
     
     if @nr_hosts > 1
@@ -86,7 +93,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 data.vm.synced_folder "/space/software", "/space/software"
                 
                 data.vm.provision :hostmanager
-                data.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, "localhost"]
+                data.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, File.basename(Dir.getwd)]
             end
         end
     end

@@ -21,6 +21,7 @@ AUTH_MODE="anyauth"
 VERSION="7"
 N_RETRY=5
 RETRY_INTERVAL=10
+SKIP=0
 
 #######################################################
 # restart_check(hostname, baseline_timestamp, caller_lineno)
@@ -90,7 +91,7 @@ CURL="curl -s -S"
 # Add authentication related options, required once security is initialized
 AUTH_CURL="${CURL} --${AUTH_MODE} --user ${USER}:${PASS}"
 
-if [ "$VERSION" -eq "6" ]; then
+if [ "$VERSION" -eq "5" ] || [ "$VERSION" -eq "6" ]; then
 	
 	yum -y install recode
 	
@@ -208,9 +209,10 @@ if [ "$VERSION" -eq "6" ]; then
 	echo "Waiting for server restart.."
 	sleep 5
 	
-	mkdir /vagrant/${JOINING_HOST}
-	cp *.html /vagrant/${JOINING_HOST}/
-	cp *.xml /vagrant/${JOINING_HOST}/
+	# Debug purposes
+	#mkdir /vagrant/${JOINING_HOST}
+	#cp *.html /vagrant/${JOINING_HOST}/
+	#cp *.xml /vagrant/${JOINING_HOST}/
 	rm *.html
     rm *.xml
 else
@@ -238,39 +240,74 @@ else
   echo $JOINER_CONFIG | grep -q "^<host"
   if [ "$?" -ne 0 ]; then
     echo "ERROR: Failed to fetch server config for $JOINING_HOST"
-    exit 1
+    SKIP=1
   fi
 
-  echo "Send $JOINING_HOST configuration to the bootstrap host $BOOTSTRAP_HOST ..."
-  # (3) Send the joining host's config to the bootstrap host, receive
-  #     the cluster config data needed to complete the join. Save the
-  #     response data to cluster-config.zip.
-  $AUTH_CURL -X POST -o cluster-config.zip -d "group=Default" \
-        --data-urlencode "server-config=${JOINER_CONFIG}" \
-        -H "Content-type: application/x-www-form-urlencoded" \
-        http://${BOOTSTRAP_HOST}:8001/admin/v1/cluster-config
-  if [ "$?" -ne 0 ]; then
-    echo "ERROR: Failed to fetch cluster config from $BOOTSTRAP_HOST"
-    exit 1
-  fi
-  if [ `file cluster-config.zip | grep -cvi "zip archive data"` -eq 1 ]; then
-    echo "ERROR: Failed to fetch cluster config from $BOOTSTRAP_HOST"
-    exit 1
-  fi
-
-  echo "Send the cluster config data to the joining host $JOINING_HOST, completing the join sequence..."
-  # (4) Send the cluster config data to the joining host, completing 
-  #     the join sequence.
-  TIMESTAMP=`$CURL -X POST -H "Content-type: application/zip" \
-      --data-binary @./cluster-config.zip \
-      http://${JOINING_HOST}:8001/admin/v1/cluster-config \
-      | grep "last-startup" \
-      | sed 's%^.*<last-startup.*>\(.*\)</last-startup>.*$%\1%'`
+  if [ "$SKIP" -ne 1 ]; then
+	  echo "Send $JOINING_HOST configuration to the bootstrap host $BOOTSTRAP_HOST ..."
+	  # (3) Send the joining host's config to the bootstrap host, receive
+	  #     the cluster config data needed to complete the join. Save the
+	  #     response data to cluster-config.zip.
+	  $AUTH_CURL -X POST -o cluster-config.zip -d "group=Default" \
+	        --data-urlencode "server-config=${JOINER_CONFIG}" \
+	        -H "Content-type: application/x-www-form-urlencoded" \
+	        http://${BOOTSTRAP_HOST}:8001/admin/v1/cluster-config
+	  if [ "$?" -ne 0 ]; then
+	    echo "ERROR: Failed to fetch cluster config from $BOOTSTRAP_HOST"
+	    exit 1
+	  fi
+	  if [ `file cluster-config.zip | grep -cvi "zip archive data"` -eq 1 ]; then
+	    echo "ERROR: Failed to fetch cluster config from $BOOTSTRAP_HOST"
+	    exit 1
+	  fi
+	  
+	  echo "Send the cluster config data to the joining host $JOINING_HOST, completing the join sequence..."
+	  # (4) Send the cluster config data to the joining host, completing 
+	  #     the join sequence.
+	  TIMESTAMP=`$CURL -X POST -H "Content-type: application/zip" \
+	      --data-binary @./cluster-config.zip \
+	      http://${JOINING_HOST}:8001/admin/v1/cluster-config \
+	      | grep "last-startup" \
+	      | sed 's%^.*<last-startup.*>\(.*\)</last-startup>.*$%\1%'`
       
-#  echo "Restart check $JOINING_HOST $TIMESTAMP $LINENO..."
-#  restart_check $JOINING_HOST $TIMESTAMP $LINENO
+	  echo "Restart check $JOINING_HOST $TIMESTAMP $LINENO..."
+	  restart_check $JOINING_HOST $TIMESTAMP $LINENO
   
-  rm ./cluster-config.zip
+	  rm ./cluster-config.zip
+  fi
+
 fi
+
+echo "Removing network suffix from hostname"
+
+$AUTH_CURL -o "hosts.html" -X GET \
+    "http://${JOINING_HOST}:8001/host-summary.xqy?section=host"
+HOST_URL=`grep "statusfirstcell" hosts.html \
+	| grep ${JOINING_HOST} \
+	| sed 's%^.*href="\(host-admin.xqy?section=host&amp;host=[^"]*\)".*$%\1%'`
+HOST_ID=`grep "statusfirstcell" hosts.html \
+	| grep ${JOINING_HOST} \
+	| sed 's%^.*href="host-admin.xqy?section=host&amp;host=\([^"]*\)".*$%\1%'`
+echo "HOST_URL is $HOST_URL"
+echo "HOST_ID is $HOST_ID"
+
+$AUTH_CURL -o "host.html" -X GET "http://${JOINING_HOST}:8001/$HOST_URL"
+HOST_XPATH=`grep host-name host.html \
+	| grep input \
+	| sed 's%^.*name="\([^"]*\)".*$%\1%'`
+echo "HOST_XPATH is $HOST_XPATH"
+
+$AUTH_CURL -X POST \
+	--data-urlencode "host=$HOST_ID" \
+	--data-urlencode "section=host" \
+	--data-urlencode "$HOST_XPATH=${JOINING_HOST}" \
+	--data-urlencode "ok=ok" \
+	"http://${JOINING_HOST}:8001/host-admin-go.xqy"
+
+service MarkLogic restart
+echo "Waiting for server restart.."
+sleep 5
+
+rm *.html
 
 echo "...$JOINING_HOST successfully added to the cluster."
