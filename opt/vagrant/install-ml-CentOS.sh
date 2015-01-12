@@ -5,12 +5,17 @@ echo "running $0 $@"
 #echo 320 > /proc/sys/vm/nr_hugepages
 #echo "transparent_hugepage=never" >> /etc/grub.conf
 
-# Install dependencies required by MarkLogic and hostmanager
-yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64 avahi avahi-tools nss-mdns nmap
+# Install dependencies required by MarkLogic
+yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64
 
-# Make sure services are started
-service messagebus restart
-service avahi-daemon start
+if [ -d /vagrant ]; then
+	# Install dependencies required by Vagrant hostmanager
+	yum -y install avahi avahi-tools nss-mdns nmap
+	
+	# Make sure services are started
+	service messagebus restart
+	service avahi-daemon start
+fi
 
 # Prepare folders for MarkLogic
 mkdir -p /space/var/opt/MarkLogic
