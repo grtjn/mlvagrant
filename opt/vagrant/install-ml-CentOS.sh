@@ -33,7 +33,7 @@ elif [ "$1" -eq "6" ]; then
     rpm -i /space/software/MarkLogic-6.0-5.3.x86_64.rpm
 elif [ "$1" -eq "8" ]; then
     echo "Installing ML 8..."
-    rpm -i /space/software/MarkLogic-8.0-20141124.x86_64.rpm
+    rpm -i /space/software/MarkLogic-8.0-1.1.x86_64.rpm
 else
     echo "Installing ML 7..."
     rpm -i /space/software/MarkLogic-7.0-4.1.x86_64.rpm

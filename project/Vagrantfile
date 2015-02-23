@@ -31,8 +31,12 @@ end
 @properties = load_properties("project.properties")
 @ml_version = ENV['ML_VERSION'] || @properties['ML_VERSION'] || "7"
 @nr_hosts = (ENV['NR_HOSTS'] || @properties['NR_HOSTS'] || "3").to_i
+@memory = (ENV['VM_MEMORY'] || @properties['VM_MEMORY'] || "6144").to_i
+@cpus = (ENV['VM_CPUS'] || @properties['VM_CPUS'] || "4").to_i
 puts "ml-version=#{@ml_version}"
 puts "nr-hosts=#{@nr_hosts}"
+puts "vm-memory=#{@memory}"
+puts "vm-cpus=#{@cpus}"
 
 def get_vm_name(i)
   File.basename(Dir.getwd) + "-ml" + i.to_s
@@ -65,8 +69,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         master.vm.box = "chef/centos-6.5"
         master.vm.provider "virtualbox" do |v|
             v.name = mastername
-            v.memory = 2048
-            v.cpus = 2
+            v.memory = @memory
+            v.cpus = @cpus
         end
         master.vm.hostname = mastername
         master.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
@@ -84,8 +88,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 data.vm.box = "chef/centos-6.5"
                 data.vm.provider "virtualbox" do |v|
                     v.name = hostname
-                    v.memory = 2048
-                    v.cpus = 2
+                    v.memory = @memory
+                    v.cpus = @cpus
                 end
                 data.vm.hostname = hostname
                 data.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
