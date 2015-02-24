@@ -4,6 +4,17 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
+#If we don't do this hostmanager plugin will give the same id to all hosts
+VAGRANT_DOTFILE_PATH = Dir.getwd + '/.vagrant'
+if(ENV['VAGRANT_DOTFILE_PATH'].nil? && '.vagrant' != VAGRANT_DOTFILE_PATH)
+    puts 'changing metadata directory to ' + VAGRANT_DOTFILE_PATH
+    ENV['VAGRANT_DOTFILE_PATH'] = VAGRANT_DOTFILE_PATH
+    FileUtils.mkdir_p VAGRANT_DOTFILE_PATH
+    system 'vagrant ' + ARGV.join(' ')
+    ENV['VAGRANT_DOTFILE_PATH'] = nil #for good measure
+    abort 'Finished'
+end
+
 def load_properties(properties_filename, prefix = "")
   properties = {}
   
@@ -73,8 +84,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             v.cpus = @cpus
         end
         master.vm.hostname = mastername
-        master.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
-        #master.vm.network "private_network", type: "dhcp"
+        #mlcp fix
+        master.hostmanager.aliases =  "#{mastername}.lan"
+        #master.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
+        master.vm.network "private_network", type: "dhcp"
         master.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
         master.vm.synced_folder "/space/software", "/space/software"
         master.vm.synced_folder Dir.getwd, "/project/root"
@@ -94,6 +107,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     v.cpus = @cpus
                 end
                 data.vm.hostname = hostname
+                data.hostmanager.aliases =  "#{mastername}.lan"
                 data.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
                 data.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
                 data.vm.synced_folder "/space/software", "/space/software"
