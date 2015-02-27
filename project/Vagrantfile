@@ -29,7 +29,7 @@ def load_properties(properties_filename, prefix = "")
 end
 
 @properties = load_properties("project.properties")
-@ml_version = ENV['ML_VERSION'] || @properties['ML_VERSION'] || "7"
+@ml_version = ENV['ML_VERSION'] || @properties['ML_VERSION'] || "8"
 @nr_hosts = (ENV['NR_HOSTS'] || @properties['NR_HOSTS'] || "3").to_i
 puts "ml-version=#{@ml_version}"
 puts "nr-hosts=#{@nr_hosts}"
