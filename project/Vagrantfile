@@ -14,7 +14,7 @@ def load_properties(properties_filename, prefix = "")
         if (line[0] != ?#) && (line[0] != ?=) && (line[0] != "")
           i = line.index('=')
           if i
-            key = prefix + line[0..i - 1].strip
+            key = prefix + line[0..i - 1].strip.upcase
             value = line[i + 1..-1].strip
             properties[key] = value
           end
