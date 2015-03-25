@@ -91,11 +91,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         master.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
         master.vm.synced_folder "/space/software", "/space/software"
         master.vm.synced_folder Dir.getwd, "/project/root"
-        
-        master.vm.provision :hostmanager
+
+        master.vm.provision :hostmanager, run: "always"
         master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, File.basename(Dir.getwd)]
     end
-    
+
     if @nr_hosts > 1
         (2..@nr_hosts).each do |i|
           hostname = get_vm_name(i, @ml_version)
