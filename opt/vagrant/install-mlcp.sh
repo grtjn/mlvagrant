@@ -2,7 +2,7 @@
 echo "running $0 $@"
 
 yum -y install zip unzip
-yum -y install java-1.7.0-openjdk-devel
+yum -y install java-1.8.0-openjdk-devel
 
 if [ "$1" -eq "8" ]; then
     echo "Installing MLCP 1.3-1..."
