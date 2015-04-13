@@ -15,13 +15,13 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Create /space/software (`sudo mkdir -p /space/software`)
-  - **For Windows**: c:\space\software
+  - **For Windows**: (`c:\space\software`)
 - Download [MarkLogic 8.0-1.1 for CentOS](http://developer.marklogic.com/products) (login required)
 - Download [MLCP 1.3-1 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-Hadoop1-1.3-1-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
 - Download mlvagrant (`git clone https://github.com/grtjn/mlvagrant.git`)
 - Create /opt/vagrant (`sudo mkdir -p /opt/vagrant`)
-  - **For Windows**: c:\opt\vagrant
+  - **For Windows**: (`c:\opt\vagrant`)
 - Copy mlvagrant/opt/vagrant to /opt/vagrant
 
 Above steps need to taken only ones. For every project you wish to create VMs, you simply take these steps:
