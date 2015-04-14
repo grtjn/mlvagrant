@@ -4,6 +4,17 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
+#If we don't do this hostmanager plugin will give the same id to all hosts
+VAGRANT_DOTFILE_PATH = Dir.getwd + '/.vagrant'
+if(ENV['VAGRANT_DOTFILE_PATH'].nil? && '.vagrant' != VAGRANT_DOTFILE_PATH)
+    puts 'changing metadata directory to ' + VAGRANT_DOTFILE_PATH
+    ENV['VAGRANT_DOTFILE_PATH'] = VAGRANT_DOTFILE_PATH
+    FileUtils.mkdir_p VAGRANT_DOTFILE_PATH
+    system 'vagrant ' + ARGV.join(' ')
+    ENV['VAGRANT_DOTFILE_PATH'] = nil #for good measure
+    abort 'Finished'
+end
+
 def load_properties(properties_filename, prefix = "")
   properties = {}
   
@@ -31,16 +42,20 @@ end
 @properties = load_properties("project.properties")
 @ml_version = ENV['ML_VERSION'] || @properties['ML_VERSION'] || "8"
 @nr_hosts = (ENV['NR_HOSTS'] || @properties['NR_HOSTS'] || "3").to_i
+@memory = (ENV['VM_MEMORY'] || @properties['VM_MEMORY'] || "6144").to_i
+@cpus = (ENV['VM_CPUS'] || @properties['VM_CPUS'] || "4").to_i
 puts "ml-version=#{@ml_version}"
 puts "nr-hosts=#{@nr_hosts}"
+puts "vm-memory=#{@memory}"
+puts "vm-cpus=#{@cpus}"
 
-def get_vm_name(i)
-  File.basename(Dir.getwd) + "-ml" + i.to_s
+def get_vm_name(i, v)
+  File.basename(Dir.getwd) + "-ml-v" + v + "-" + i.to_s
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
-    mastername = get_vm_name(1)
+    mastername = get_vm_name(1, @ml_version)
   
     config.hostmanager.enabled = false
     config.hostmanager.manage_host = true
@@ -65,29 +80,34 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         master.vm.box = "chef/centos-6.5"
         master.vm.provider "virtualbox" do |v|
             v.name = mastername
-            v.memory = 2048
-            v.cpus = 2
+            v.memory = @memory
+            v.cpus = @cpus
         end
         master.vm.hostname = mastername
-        master.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
+        #mlcp fix
+        master.hostmanager.aliases =  "#{mastername}.lan"
+        #master.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
+        master.vm.network "private_network", type: "dhcp"
         master.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
         master.vm.synced_folder "/space/software", "/space/software"
-        
-        master.vm.provision :hostmanager
+        master.vm.synced_folder Dir.getwd, "/project/root"
+
+        master.vm.provision :hostmanager, run: "always"
         master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, File.basename(Dir.getwd)]
     end
-    
+
     if @nr_hosts > 1
         (2..@nr_hosts).each do |i|
-          hostname = get_vm_name(i)
+          hostname = get_vm_name(i, @ml_version)
           config.vm.define hostname do |data|
                 data.vm.box = "chef/centos-6.5"
                 data.vm.provider "virtualbox" do |v|
                     v.name = hostname
-                    v.memory = 2048
-                    v.cpus = 2
+                    v.memory = @memory
+                    v.cpus = @cpus
                 end
                 data.vm.hostname = hostname
+                data.hostmanager.aliases =  "#{mastername}.lan"
                 data.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
                 data.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
                 data.vm.synced_folder "/space/software", "/space/software"
