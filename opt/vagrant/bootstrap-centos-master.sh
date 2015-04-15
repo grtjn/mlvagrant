@@ -9,3 +9,4 @@ sudo /opt/vagrant/install-user.sh $4
 sudo /opt/vagrant/setup-git.sh $4
 sudo /opt/vagrant/setup-tomcat.sh
 sudo /opt/vagrant/backup-yum-cache.sh
+sudo /opt/vagrant/set-env-vars.sh
