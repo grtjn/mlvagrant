@@ -9,12 +9,12 @@ echo "running $0 $@"
 yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64
 
 if [ -d /vagrant ]; then
-	# Install dependencies required by Vagrant hostmanager
-	yum -y install avahi avahi-tools nss-mdns nmap
-	
-	# Make sure services are started
-	service messagebus restart
-	service avahi-daemon start
+  # Install dependencies required by Vagrant hostmanager
+  yum -y install avahi avahi-tools nss-mdns nmap
+
+  # Make sure services are started
+  service messagebus restart
+  service avahi-daemon start
 fi
 
 # Prepare folders for MarkLogic
@@ -36,7 +36,7 @@ elif [ "$1" -eq "8" ]; then
     rpm -i /space/software/MarkLogic-8.0-2.x86_64.rpm
 else
     echo "Installing ML 7..."
-    rpm -i /space/software/MarkLogic-7.0-4.1.x86_64.rpm
+    rpm -i /space/software/MarkLogic-7.0-5.x86_64.rpm
 fi
 
 # Make sure MarkLogic is started
