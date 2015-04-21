@@ -6,18 +6,26 @@ yum -y install java
 
 if [ "$1" -eq "8" ]; then
     echo "Installing MLCP 1.3-2..."
-	if [ ! -d /opt/mlcp-Hadoop2-1.3-2 ]; then
-	    cd /opt && unzip /space/software/mlcp-Hadoop2-1.3-2-bin.zip
-	fi
-	if [ ! -h /usr/local/mlcp ]; then
-	    cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.3-2 mlcp
-	fi
+  if [ ! -d /opt/mlcp-Hadoop2-1.3-2 ]; then
+      cd /opt && unzip /space/software/mlcp-Hadoop2-1.3-2-bin.zip
+  fi
+  if [ ! -h /usr/local/mlcp ]; then
+      cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.3-2 mlcp
+  fi
+elif [ "$1" -eq "7" ]; then
+    echo "Installing MLCP 1.2-4..."
+  if [ ! -d /opt/mlcp-Hadoop2-1.2-4 ]; then
+      cd /opt && unzip /space/software/mlcp-Hadoop2-1.2-4-bin.zip
+  fi
+  if [ ! -h /usr/local/mlcp ]; then
+      cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.2-4 mlcp
+  fi
 else
-    echo "Installing MLCP 1.2-3..."
-	if [ ! -d /opt/mlcp-Hadoop2-1.2-3 ]; then
-	    cd /opt && unzip /space/software/mlcp-Hadoop2-1.2-3-bin.zip
-	fi
-	if [ ! -h /usr/local/mlcp ]; then
-	    cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.2-3 mlcp
-	fi
+    echo "Installing MLCP 1.0-5..."
+  if [ ! -d /opt/mlcp-Hadoop2-1.0-5 ]; then
+      cd /opt && unzip /space/software/mlcp-Hadoop2-1.0-5-bin.zip
+  fi
+  if [ ! -h /usr/local/mlcp ]; then
+      cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.0-5 mlcp
+  fi
 fi
