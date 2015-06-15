@@ -5,12 +5,12 @@ yum -y install zip unzip
 yum -y install java
 
 if [ "$1" -eq "8" ]; then
-  echo "Installing MLCP 1.3-2..."
-  if [ ! -d /opt/mlcp-Hadoop2-1.3-2 ]; then
-      cd /opt && unzip /space/software/mlcp-Hadoop2-1.3-2-bin.zip
+    echo "Installing MLCP 1.3-2..."
+  if [ ! -d /opt/mlcp-1.3-3 ]; then
+      cd /opt && unzip /space/software/mlcp-1.3-3-bin.zip
   fi
   if [ ! -h /usr/local/mlcp ]; then
-      cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.3-2 mlcp
+      cd /usr/local && ln -s /opt/mlcp-1.3-3 mlcp
   fi
 elif [ "$1" -eq "7" ]; then
     echo "Installing MLCP 1.2-4..."
