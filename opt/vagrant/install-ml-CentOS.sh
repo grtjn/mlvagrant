@@ -9,12 +9,12 @@ echo "running $0 $@"
 yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64
 
 if [ -d /vagrant ]; then
-	# Install dependencies required by Vagrant hostmanager
-	yum -y install avahi avahi-tools nss-mdns nmap
+  # Install dependencies required by Vagrant hostmanager
+  yum -y install avahi avahi-tools nss-mdns nmap
 
-	# Make sure services are started
-	service messagebus restart
-	service avahi-daemon start
+  # Make sure services are started
+  service messagebus restart
+  service avahi-daemon start
 fi
 
 # Prepare folders for MarkLogic
