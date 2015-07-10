@@ -1,6 +1,9 @@
 #! /bin/sh
 echo "running $0 $@"
 
+# Load the normalized project properties.
+source /tmp/mlvagrant.project.properties
+
 # TODO: Apply recommended page settings
 #echo 320 > /proc/sys/vm/nr_hugepages
 #echo "transparent_hugepage=never" >> /etc/grub.conf
@@ -24,20 +27,22 @@ if [ ! -h /var/opt/MarkLogic ]; then
     cd /var/opt && sudo ln -s /space/var/opt/MarkLogic MarkLogic
 fi
 
-# Run MarkLogic installer
-if [ "$1" -eq "5" ]; then
-    echo "Installing ML 5..."
-    rpm -i /space/software/MarkLogic-5.0-6.1.x86_64.rpm
-elif [ "$1" -eq "6" ]; then
-    echo "Installing ML 6..."
-    rpm -i /space/software/MarkLogic-6.0-5.3.x86_64.rpm
-elif [ "$1" -eq "8" ]; then
-    echo "Installing ML 8..."
-    rpm -i /space/software/MarkLogic-8.0-3.x86_64.rpm
+# Determine the MarkLogic installer to use
+if [ -n "${ml_installer}" ]; then
+    installer=${ml_installer}
+elif [ "${ml_version}" -eq "5" ]; then
+    installer="MarkLogic-5.0-6.1.x86_64.rpm"
+elif [ "${ml_version}" -eq "6" ]; then
+    installer="MarkLogic-6.0-5.3.x86_64.rpm"
+elif [ "${ml_version}" -eq "8" ]; then
+    installer="MarkLogic-8.0-3.x86_64.rpm"
 else
-    echo "Installing ML 7..."
-    rpm -i /space/software/MarkLogic-7.0-5.1.x86_64.rpm
+    installer="MarkLogic-7.0-5.1.x86_64.rpm"
 fi
+
+# Run MarkLogic installer
+echo "Installing ML using /space/software/$installer ..."
+rpm -i "/space/software/$installer"
 
 # Make sure MarkLogic is started
 service MarkLogic restart

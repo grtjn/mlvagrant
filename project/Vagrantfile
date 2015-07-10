@@ -29,10 +29,15 @@ def load_properties(properties_filename, prefix = "")
 end
 
 @properties = load_properties("project.properties")
-@ml_version = ENV['ML_VERSION'] || @properties['ML_VERSION'] || "8"
-@nr_hosts = (ENV['NR_HOSTS'] || @properties['NR_HOSTS'] || "3").to_i
+@ml_version = @properties['ML_VERSION'] || "8"
+@nr_hosts = (@properties['NR_HOSTS'] || "3").to_i
 puts "ml-version=#{@ml_version}"
 puts "nr-hosts=#{@nr_hosts}"
+
+@ml_installer = @properties['ML_INSTALLER'] || ""
+@mlcp_installer = @properties['MLCP_INSTALLER'] || ""
+puts "ml-installer=#{@ml_installer}"
+puts "mlcp-installer=#{@mlcp_installer}"
 
 @priv_net_ip = ENV['PRIV_NET_IP'] || @properties['PRIV_NET_IP']
 if @priv_net_ip != ""

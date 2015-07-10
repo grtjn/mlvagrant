@@ -1,31 +1,29 @@
 #! /bin/sh
 echo "running $0 $@"
 
+# Load the normalized project properties.
+source /tmp/mlvagrant.project.properties
+
 yum -y install zip unzip
 yum -y install java
 
-if [ "$1" -eq "8" ]; then
-    echo "Installing MLCP 1.3-2..."
-  if [ ! -d /opt/mlcp-1.3-3 ]; then
-      cd /opt && unzip /space/software/mlcp-1.3-3-bin.zip
-  fi
-  if [ ! -h /usr/local/mlcp ]; then
-      cd /usr/local && ln -s /opt/mlcp-1.3-3 mlcp
-  fi
-elif [ "$1" -eq "7" ]; then
-    echo "Installing MLCP 1.2-4..."
-  if [ ! -d /opt/mlcp-Hadoop2-1.2-4 ]; then
-      cd /opt && unzip /space/software/mlcp-Hadoop2-1.2-4-bin.zip
-  fi
-  if [ ! -h /usr/local/mlcp ]; then
-      cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.2-4 mlcp
-  fi
+# Determine installer to use.
+if [ -n "${mlcp_installer}" ]; then
+  installer=${mlcp_installer} 
+elif [ "${ml_version}" -eq "8" ]; then
+  installer=mlcp-1.3-3-bin.zip
+elif [ "${ml_version}" -eq "7" ]; then
+  installer=mlcp-Hadoop2-1.2-4-bin.zip
 else
-  echo "Installing MLCP 1.0-5..."
-  if [ ! -d /opt/mlcp-Hadoop2-1.0-5 ]; then
-      cd /opt && unzip /space/software/mlcp-Hadoop2-1.0-5-bin.zip
-  fi
-  if [ ! -h /usr/local/mlcp ]; then
-      cd /usr/local && ln -s /opt/mlcp-Hadoop2-1.0-5 mlcp
-  fi
+  installer=mlcp-Hadoop2-1.0-5-bin.zip
+fi
+
+echo "Installing MLCP using $installer ..."
+install_dir=$(echo $installer | sed -e "s/-bin.zip//g")
+if [ ! -d /opt/$install_dir ]; then
+  cd /opt && unzip "/space/software/$installer"
+fi
+if [ ! -h /usr/local/mlcp ]; then
+  echo "setting sym-link: /opt/$install_dir for mlcp"
+  cd /usr/local && ln -s "/opt/$install_dir" mlcp
 fi
