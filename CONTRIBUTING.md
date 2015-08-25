@@ -170,5 +170,5 @@ from the main (upstream) repository:
     ```
 
 [readme]: https://github.com/grtjn/mlvagrant/blob/master/README.md
-[issue tracker]: https://github.com/marklogic/mlvagrant/issues
+[issue tracker]: https://github.com/grtjn/mlvagrant/issues
 [.editorconfig]: http://editorconfig.org/
