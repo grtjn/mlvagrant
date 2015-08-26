@@ -28,33 +28,73 @@ def load_properties(properties_filename, prefix = "")
   properties
 end
 
-@properties = load_properties("project.properties")
-@ml_version = @properties['ML_VERSION'] || "8"
-@nr_hosts = (@properties['NR_HOSTS'] || "3").to_i
-puts "ml-version=#{@ml_version}"
-puts "nr-hosts=#{@nr_hosts}"
-
-@ml_installer = @properties['ML_INSTALLER'] || ""
-@mlcp_installer = @properties['MLCP_INSTALLER'] || ""
-puts "ml-installer=#{@ml_installer}"
-puts "mlcp-installer=#{@mlcp_installer}"
-
-@priv_net_ip = ENV['PRIV_NET_IP'] || @properties['PRIV_NET_IP']
-if @priv_net_ip != ""
-  puts "priv-net-ip=#{@priv_net_ip}"
-else
-  puts "Using DHCP for Private Network"
-end
-
-@shared_folder_host = ENV['SHARED_FOLDER_HOST'] || @properties['SHARED_FOLDER_HOST']
-@shared_folder_guest = ENV['SHARED_FOLDER_GUEST'] || @properties['SHARED_FOLDER_GUEST']
-if @shared_folder_host != "" and  @shared_folder_guest != ""
-  puts "shared-folder-host=#{@shared_folder_host}"
-  puts "shared-folder-guest=#{@shared_folder_guest}"
-end
-
 def get_vm_name(i)
-  File.basename(Dir.getwd) + "-ml" + i.to_s
+  name = "#{@vm_name}"
+  name.gsub!(/\{project_name\}/, @project_name)
+  name.gsub!(/\{ml_version\}/, @ml_version)
+  name.gsub!(/\{i\}/, i.to_s)
+  name
+end
+
+def inc_ip(ip, i)
+  newip = "#{ip}"
+  nr = "#{ip}"
+  nr.gsub!(/^(.*\.)+/, "").to_i
+  newip.gsub!(/\.\d+$/, ".#{nr + i}")
+  newip
+end
+
+@command = ARGV[0]
+
+@properties = load_properties("project.properties")
+@project_name = ENV['MLV_PROJECT_NAME'] || @properties['PROJECT_NAME'] || File.basename(Dir.getwd)
+
+@vm_name = ENV['MLV_VM_NAME'] || @properties['VM_NAME'] || "{project_name}-ml{i}"
+@vm_version = ENV['MLV_VM_VERSION'] || @properties['VM_VERSION'] || "6.5"
+@ml_version = ENV['MLV_ML_VERSION'] || @properties['ML_VERSION'] || "8"
+@nr_hosts = (ENV['MLV_NR_HOSTS'] || @properties['NR_HOSTS'] || "3").to_i
+@master_memory = (ENV['MLV_MASTER_MEMORY'] || @properties['MASTER_MEMORY'] || "2048").to_i
+@master_cpus = (ENV['MLV_MASTER_CPUS'] || @properties['MASTER_CPUS'] || "2").to_i
+@slave_memory = (ENV['MLV_SLAVE_MEMORY'] || @properties['SLAVE_MEMORY'] || @master_memory.to_s).to_i
+@slave_cpus = (ENV['MLV_SLAVE_CPUS'] || @properties['SLAVE_CPUS'] || @master_cpus.to_s).to_i
+@ml_installer = ENV['MLV_ML_INSTALLER'] || @properties['ML_INSTALLER'] || ""
+@mlcp_installer = ENV['MLV_MLCP_INSTALLER'] || @properties['MLCP_INSTALLER'] || ""
+@priv_net_ip = ENV['MLV_PRIV_NET_IP'] || @properties['PRIV_NET_IP'] || ""
+@shared_folder_host = ENV['MLV_SHARED_FOLDER_HOST'] || @properties['SHARED_FOLDER_HOST'] || ""
+@shared_folder_guest = ENV['MLV_SHARED_FOLDER_GUEST'] || @properties['SHARED_FOLDER_GUEST'] || ""
+
+@vm_name = get_vm_name("{i}")
+
+puts "Loading project #{@project_name}.."
+if @command == "status" or @command == "up"
+  puts ""
+  puts "vm_name=#{@vm_name}"
+  puts "vm_version=#{@vm_version}"
+  puts "ml_version=#{@ml_version}"
+  puts "nr_hosts=#{@nr_hosts}"
+  puts "master_memory=#{@master_memory}"
+  puts "master_cpus=#{@master_cpus}"
+  if @nr_hosts > 1
+    puts "slave_memory=#{@slave_memory}"
+    puts "slave_cpus=#{@slave_cpus}"
+  end
+  if @ml_installer != ""
+    puts "ml_installer=#{@ml_installer}"
+  end
+  if @mlcp_installer != ""
+    puts "mlcp_installer=#{@mlcp_installer}"
+  end
+  if @shared_folder_host != "" and  @shared_folder_guest != ""
+    puts "shared_folder_host=#{@shared_folder_host}"
+    puts "shared_folder_guest=#{@shared_folder_guest}"
+  end
+  if @priv_net_ip != ""
+    puts "priv_net_ip=#{@priv_net_ip}"
+  else
+    puts ""
+    puts "Using DHCP for Private Network"
+  end
+  puts ""
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -81,17 +121,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     config.vm.define mastername do |master|
-        master.vm.box = "chef/centos-6.5"
+        master.vm.box = "chef/centos-#{@vm_version}"
         master.vm.provider "virtualbox" do |v|
             v.name = mastername
-            v.memory = 2048
-            v.cpus = 2
+            v.memory = @master_memory
+            v.cpus = @master_cpus
         end
         master.vm.hostname = mastername
         if @priv_net_ip != ""
           master.vm.network "private_network", ip: @priv_net_ip
         else
-          config.vm.network "private_network", type: "dhcp"
+          master.vm.network "private_network", type: "dhcp"
         end
         master.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
         master.vm.synced_folder "/space/software", "/space/software"
@@ -105,20 +145,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     if @nr_hosts > 1
         (2..@nr_hosts).each do |i|
           hostname = get_vm_name(i)
-          config.vm.define hostname do |data|
-                data.vm.box = "chef/centos-6.5"
-                data.vm.provider "virtualbox" do |v|
+          config.vm.define hostname do |slave|
+                slave.vm.box = "chef/centos-#{@vm_version}"
+                slave.vm.provider "virtualbox" do |v|
                     v.name = hostname
-                    v.memory = 2048
-                    v.cpus = 2
+                    v.memory = @slave_memory
+                    v.cpus = @slave_cpus
                 end
-                data.vm.hostname = hostname
-                data.vm.network "public_network", bridge: 'en0: Wi-Fi (AirPort)'
-                data.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
-                data.vm.synced_folder "/space/software", "/space/software"
-
-                data.vm.provision :hostmanager
-                data.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, File.basename(Dir.getwd)]
+                slave.vm.hostname = hostname
+                if @priv_net_ip != ""
+                  slave.vm.network "private_network", ip: inc_ip(@priv_net_ip, i)
+                else
+                  slave.vm.network "private_network", type: "dhcp"
+                end
+                slave.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
+                slave.vm.synced_folder "/space/software", "/space/software"
+                if @shared_folder_host != "" and  @shared_folder_guest != ""
+                  slave.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
+                end
+                slave.vm.provision :hostmanager
+                slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, File.basename(Dir.getwd)]
             end
         end
     end
