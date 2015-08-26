@@ -2,14 +2,18 @@
 echo "running $0 $@"
 
 # Load the normalized project properties.
-source /tmp/mlvagrant.project.properties
+source /tmp/$1.project.properties
 
 # TODO: Apply recommended page settings
 #echo 320 > /proc/sys/vm/nr_hugepages
 #echo "transparent_hugepage=never" >> /etc/grub.conf
 
 # Install dependencies required by MarkLogic
-yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64
+yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64 cyrus-sasl cyrus-sasl-lib cyrus-sasl-md5
+
+if [ -f /lib64/libsasl2.so.3 ]; then
+    ln -s /lib64/libsasl2.so.3 /lib64/libsasl2.so.2
+fi
 
 if [ -d /vagrant ]; then
   # Install dependencies required by Vagrant hostmanager
