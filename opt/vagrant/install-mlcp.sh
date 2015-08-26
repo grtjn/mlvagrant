@@ -2,10 +2,10 @@
 echo "running $0 $@"
 
 # Load the normalized project properties.
-source /tmp/mlvagrant.project.properties
+source /tmp/$1.project.properties
 
 yum -y install zip unzip
-yum -y install java
+yum -y install java-1.8.0-openjdk-devel
 
 # Determine installer to use.
 if [ -n "${mlcp_installer}" ]; then
