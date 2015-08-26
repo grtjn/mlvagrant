@@ -13,7 +13,7 @@ if [ ! -f HEAD ]; then
     git --bare init
 fi
 if [ ! -f hooks/post-receive ]; then
-    printf "#!/bin/sh\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f master\nchown -R :sshuser /space/projects/$1.live\nchmod -R g+rw /space/projects/$1.live\n" > hooks/post-receive
+    printf "#!/bin/sh\nin=\$(cat)\nbranch=\${in##*/}\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f \$branch\nchown -R :sshuser /space/projects/$1.live\nchmod -R g+rw /space/projects/$1.live\n" > hooks/post-receive
     chmod 755 hooks/post-receive
 fi
 
@@ -27,10 +27,10 @@ if [ -d /vagrant ]; then
   chown -R $1:sshuser $1.live
 else
   # creation of users is limited on demo servers
-  chown -R :sshuser $1.git
-  chown -R :sshuser $1.live
+  chown -R $USER:sshuser $1.git
+  chown -R $USER:sshuser $1.live
 fi
-chmod g+s $1.git
-chmod g+s $1.live
 chmod -R g+rw $1.git
 chmod -R g+rw $1.live
+chmod g+s $1.git
+chmod g+s $1.live
