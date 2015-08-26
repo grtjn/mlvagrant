@@ -6,9 +6,13 @@ os=`cat /etc/redhat-release`
 # no need for caching installs on demo servers
 if [ -d /vagrant ]; then
   if [[ $os == *"7."* ]]; then
-    cp -R /space/software/yum-centos7 /var/cache/yum
+    if [ -d /space/software/yum-centos7 ]; then
+      cp -R /space/software/yum-centos7 /var/cache/yum
+    fi
   else
-    cp -R /space/software/yum /var/cache/
+    if [ -d /space/software/yum ]; then
+      cp -R /space/software/yum /var/cache/
+    fi
   fi
   
   sed -i '/keepcache/ s/0/1/' /etc/yum.conf
