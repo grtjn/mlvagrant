@@ -4,15 +4,39 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
+# Vagrant by default saves VM info in a .vagrant/ folder next to where Vagrantfile lives.
+# You can however start vagrant from a subfolder, in which case VM info from different VMs
+# could get mixed up. Make sure to put .vagrant/ in CWD rather than next to Vagrantfile
+# if there is no Vagrantfile in CWD.
+VAGRANTFILE = ENV["VAGRANT_VAGRANTFILE"] || "Vagrantfile"
+VAGRANTFILE_PATH = Dir.getwd + "/" + VAGRANTFILE
+
+@command = ARGV[0]
+
+if @command != "global-status" && # skip this for global-status
+  !(File.exists? VAGRANTFILE_PATH) && # Vagrantfile must be in a higher dir
+    ENV["VAGRANT_DOTFILE_PATH"].nil? # and .vagrant location is not set explicitly
+  
+  VAGRANT_DOTFILE_PATH = Dir.getwd + "/.vagrant"
+  puts "Setting VAGRANT_DOTFILE_PATH to " + VAGRANT_DOTFILE_PATH
+  puts ""
+
+  ENV["VAGRANT_DOTFILE_PATH"] = VAGRANT_DOTFILE_PATH
+  system "vagrant " + ARGV.join(" ")
+  ENV["VAGRANT_DOTFILE_PATH"] = nil # for good measure
+
+  abort "Finished"
+end
+
 def load_properties(properties_filename, prefix = "")
   properties = {}
 
   if File.exists? properties_filename
-    File.open(properties_filename, 'r') do |properties_file|
+    File.open(properties_filename, "r") do |properties_file|
       properties_file.read.each_line do |line|
         line.strip!
         if (line[0] != ?#) && (line[0] != ?=) && (line[0] != "")
-          i = line.index('=')
+          i = line.index("=")
           if i
             key = prefix + line[0..i - 1].strip.upcase
             value = line[i + 1..-1].strip
@@ -22,7 +46,7 @@ def load_properties(properties_filename, prefix = "")
       end
     end
   else
-    puts "WARN: Properties file #{properties_filename} not found.."
+    puts "WARN: Properties file #{properties_filename} not found.." unless @command == "global-status"
   end
 
   properties
@@ -44,29 +68,27 @@ def inc_ip(ip, i)
   newip
 end
 
-@command = ARGV[0]
-
 @properties = load_properties("project.properties")
-@project_name = ENV['MLV_PROJECT_NAME'] || @properties['PROJECT_NAME'] || File.basename(Dir.getwd)
+@project_name = ENV["MLV_PROJECT_NAME"] || @properties["PROJECT_NAME"] || File.basename(Dir.getwd)
 
-@vm_name = ENV['MLV_VM_NAME'] || @properties['VM_NAME'] || "{project_name}-ml{i}"
-@vm_version = ENV['MLV_VM_VERSION'] || @properties['VM_VERSION'] || "6.5"
-@ml_version = ENV['MLV_ML_VERSION'] || @properties['ML_VERSION'] || "8"
-@nr_hosts = (ENV['MLV_NR_HOSTS'] || @properties['NR_HOSTS'] || "3").to_i
-@master_memory = (ENV['MLV_MASTER_MEMORY'] || @properties['MASTER_MEMORY'] || "2048").to_i
-@master_cpus = (ENV['MLV_MASTER_CPUS'] || @properties['MASTER_CPUS'] || "2").to_i
-@slave_memory = (ENV['MLV_SLAVE_MEMORY'] || @properties['SLAVE_MEMORY'] || @master_memory.to_s).to_i
-@slave_cpus = (ENV['MLV_SLAVE_CPUS'] || @properties['SLAVE_CPUS'] || @master_cpus.to_s).to_i
-@ml_installer = ENV['MLV_ML_INSTALLER'] || @properties['ML_INSTALLER'] || ""
-@mlcp_installer = ENV['MLV_MLCP_INSTALLER'] || @properties['MLCP_INSTALLER'] || ""
-@priv_net_ip = ENV['MLV_PRIV_NET_IP'] || @properties['PRIV_NET_IP'] || ""
-@shared_folder_host = ENV['MLV_SHARED_FOLDER_HOST'] || @properties['SHARED_FOLDER_HOST'] || ""
-@shared_folder_guest = ENV['MLV_SHARED_FOLDER_GUEST'] || @properties['SHARED_FOLDER_GUEST'] || ""
+@vm_name = ENV["MLV_VM_NAME"] || @properties["VM_NAME"] || "{project_name}-ml{i}"
+@vm_version = ENV["MLV_VM_VERSION"] || @properties["VM_VERSION"] || "6.5"
+@ml_version = ENV["MLV_ML_VERSION"] || @properties["ML_VERSION"] || "8"
+@nr_hosts = (ENV["MLV_NR_HOSTS"] || @properties["NR_HOSTS"] || "3").to_i
+@master_memory = (ENV["MLV_MASTER_MEMORY"] || @properties["MASTER_MEMORY"] || "2048").to_i
+@master_cpus = (ENV["MLV_MASTER_CPUS"] || @properties["MASTER_CPUS"] || "2").to_i
+@slave_memory = (ENV["MLV_SLAVE_MEMORY"] || @properties["SLAVE_MEMORY"] || @master_memory.to_s).to_i
+@slave_cpus = (ENV["MLV_SLAVE_CPUS"] || @properties["SLAVE_CPUS"] || @master_cpus.to_s).to_i
+@ml_installer = ENV["MLV_ML_INSTALLER"] || @properties["ML_INSTALLER"] || ""
+@mlcp_installer = ENV["MLV_MLCP_INSTALLER"] || @properties["MLCP_INSTALLER"] || ""
+@priv_net_ip = ENV["MLV_PRIV_NET_IP"] || @properties["PRIV_NET_IP"] || ""
+@shared_folder_host = ENV["MLV_SHARED_FOLDER_HOST"] || @properties["SHARED_FOLDER_HOST"] || ""
+@shared_folder_guest = ENV["MLV_SHARED_FOLDER_GUEST"] || @properties["SHARED_FOLDER_GUEST"] || ""
 
 @vm_name = get_vm_name("{i}")
 
-puts "Loading project #{@project_name}.."
-if @command == "status" or @command == "up"
+puts "Loading project #{@project_name}.." unless @command == "global-status"
+if @command == "status" or @command == "up" or @command == "provision"
   puts ""
   puts "vm_name=#{@vm_name}"
   puts "vm_version=#{@vm_version}"
@@ -107,10 +129,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.hostmanager.ignore_private_ip = false
     config.hostmanager.ip_resolver = proc do |machine|
         result = ""
-        machine.communicate.execute("ifconfig eth1") do |type, data|
-          result << data if type == :stdout
+        begin
+          machine.communicate.execute("ifconfig eth1") do |type, data|
+            result << data if type == :stdout
+          end
+        rescue
+          result = "# NOT-UP"
+          puts "Getting IP from #{ machine.name } ... not running"
+          next
         end
-        (ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)) && ip[1]
+        ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)[1]
+        puts "Getting IP from #{ machine.name } ... #{ip}"
+        ip
     end
 
     # Customize the virtual machine environments
@@ -133,13 +163,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         else
           master.vm.network "private_network", type: "dhcp"
         end
+        master.vm.synced_folder Dir.getwd, "/vagrant"
         master.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
         master.vm.synced_folder "/space/software", "/space/software"
         if @shared_folder_host != "" and  @shared_folder_guest != ""
           master.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
         end
-        master.vm.provision :hostmanager
-        master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, File.basename(Dir.getwd)]
+        master.vm.provision :hostmanager, run: "always"
+        master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name]
     end
 
     if @nr_hosts > 1
@@ -158,13 +189,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 else
                   slave.vm.network "private_network", type: "dhcp"
                 end
+                slave.vm.synced_folder Dir.getwd, "/vagrant"
                 slave.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
                 slave.vm.synced_folder "/space/software", "/space/software"
                 if @shared_folder_host != "" and  @shared_folder_guest != ""
                   slave.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
                 end
-                slave.vm.provision :hostmanager
-                slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, File.basename(Dir.getwd)]
+                slave.vm.provision :hostmanager, run: "always"
+                slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name]
             end
         end
     end

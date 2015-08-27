@@ -14,26 +14,30 @@ You first need to download and install prerequisites and mlvagrant itself:
 
 - Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
-- Create /space/software (`sudo mkdir -p /space/software`)
-  - **For Windows**: (`c:\space\software`)
-- Make sure Vagrant has write access to that folder (`sudo chmod 775 /space/software`)
+- Install the [vagrant-hostmanager](https://github.com/smdahlen/vagrant-hostmanager) plugin:
+  - `vagrant plugin install vagrant-hostmanager`
+- Create /space/software (**For Windows**: `c:\space\software`):
+  - `sudo mkdir -p /space/software`
+- Make sure Vagrant has write access to that folder:
+  - `sudo chmod 775 /space/software`
 - Download [MarkLogic 8.0-3 for CentOS](http://developer.marklogic.com/products) (login required)
 - Download [MLCP 1.3-3 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-1.3-3-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
-- Download mlvagrant (`git clone https://github.com/grtjn/mlvagrant.git` or pull down one of its release zips)
-- Create /opt/vagrant (`sudo mkdir -p /opt/vagrant`)
-  - **For Windows**: (`c:\opt\vagrant`)
-- Make sure Vagrant has write access (`sudo chmod 775 /opt/vagrant`)
+- Download mlvagrant:
+  - `git clone https://github.com/grtjn/mlvagrant.git`
+  - or pull down one of its release zips
+- Create /opt/vagrant (**For Windows**: `c:\opt\vagrant`):
+  - `sudo mkdir -p /opt/vagrant`
+- Make sure Vagrant has write access
+  - `sudo chmod 775 /opt/vagrant`
 - Copy mlvagrant/opt/vagrant to /opt/vagrant
 
 Above steps need to taken only once. For every project you wish to create VMs, you simply take these steps:
 
-- Create a new project folder anywhere you like, but with a short name without spaces ('vgtest' for instance)
+- Create a new project folder (anywhere you like) with a short name without spaces ('vgtest' for instance)
 - Copy mlvagrant/project/Vagrantfile to that folder
 - Copy mlvagrant/project/project.properties to that folder
-- Open a Terminal or command-line in that folder
-- Run:
-  - `vagrant plugin install vagrant-hostmanager`
+- Open a Terminal or command-line in that folder, and run:
   - `vagrant up --no-provision` (may take a while depending on bandwidth, particularly first time)
   - `vagrant provision` (may take a while, enter sudo password when asked, to allow changing /etc/hosts)
 
@@ -82,9 +86,9 @@ The minimum number of hosts is 1, the maximum is limited mostly by the local res
 
 Note: although you can technically create a cluster of just 2 nodes, 3 nodes is required for proper fail-over. The cluster needs a quorum to vote if a host should be excluded.
 
-The ml_version is used in the `install-ml-CentOs.sh` script to select the appropriate installer. Code is in place to install versions 5, 6, 7, and 8. The install-ml script refers to rpm by exact name, which includes subversion number, and patch level. Feel free to change it locally to match the exact version you prefer to install.
+The ml_version is used in the `install-ml-centos.sh` script to select the appropriate installer. Code is in place to install versions 5, 6, 7, and 8. The install-ml script refers to rpm by exact name, which includes subversion number, and patch level. Feel free to change it locally to match the exact version you prefer to install.
 
-For other settings see below..
+For the full list of settings see below..
 
 ### project_name
 Project name - defaults to current directory name
