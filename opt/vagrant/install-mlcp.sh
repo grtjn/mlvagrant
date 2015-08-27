@@ -1,6 +1,9 @@
 #! /bin/sh
 echo "running $0 $@"
 
+# Defaults
+ml_version=8
+
 # Load the normalized project properties.
 source /tmp/$1.project.properties
 
@@ -10,9 +13,9 @@ yum -y install java-1.8.0-openjdk-devel
 # Determine installer to use.
 if [ -n "${mlcp_installer}" ]; then
   installer=${mlcp_installer} 
-elif [ "${ml_version}" -eq "8" ]; then
+elif [ "${ml_version}" = "8" ]; then
   installer=mlcp-1.3-3-bin.zip
-elif [ "${ml_version}" -eq "7" ]; then
+elif [ "${ml_version}" = "7" ]; then
   installer=mlcp-Hadoop2-1.2-4-bin.zip
 else
   installer=mlcp-Hadoop2-1.0-5-bin.zip
