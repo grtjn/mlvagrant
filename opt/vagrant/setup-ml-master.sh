@@ -19,8 +19,8 @@ PASS="admin"
 AUTH_MODE="anyauth"
 VERSION="7"
 SEC_REALM="public"
-N_RETRY=5
-RETRY_INTERVAL=10
+N_RETRY=10
+RETRY_INTERVAL=5
 
 #######################################################
 # restart_check(hostname, baseline_timestamp, caller_lineno)
@@ -35,13 +35,15 @@ RETRY_INTERVAL=10
 # Returns 0 if restart is detected, exits with an error if not.
 #
 function restart_check {
-  echo "restart check for $1..."
-  LAST_START=`$AUTH_CURL "http://$1:8001/admin/v1/timestamp"`
+  echo "Restart check for $1..."
+  LAST_START=`$AUTH_CURL --max-time 1 -s "http://$1:8001/admin/v1/timestamp"`
   for i in `seq 1 ${N_RETRY}`; do
+    # continue as long as timestamp didn't change, or no output was returned
     if [ "$2" == "$LAST_START" ] || [ "$LAST_START" == "" ]; then
       sleep ${RETRY_INTERVAL}
-      LAST_START=`$AUTH_CURL "http://$1:8001/admin/v1/timestamp"`
-    else 
+      echo "Retrying..."
+      LAST_START=`$AUTH_CURL --max-time 1 -s "http://$1:8001/admin/v1/timestamp"`
+    else
       return 0
     fi
   done
