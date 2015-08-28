@@ -72,7 +72,7 @@ end
 @project_name = ENV["MLV_PROJECT_NAME"] || @properties["PROJECT_NAME"] || File.basename(Dir.getwd)
 
 @vm_name = ENV["MLV_VM_NAME"] || @properties["VM_NAME"] || "{project_name}-ml{i}"
-@vm_version = ENV["MLV_VM_VERSION"] || @properties["VM_VERSION"] || "6.5"
+@vm_version = ENV["MLV_VM_VERSION"] || @properties["VM_VERSION"] || "6.7"
 @ml_version = ENV["MLV_ML_VERSION"] || @properties["ML_VERSION"] || "8"
 @nr_hosts = (ENV["MLV_NR_HOSTS"] || @properties["NR_HOSTS"] || "3").to_i
 @master_memory = (ENV["MLV_MASTER_MEMORY"] || @properties["MASTER_MEMORY"] || "2048").to_i
@@ -151,7 +151,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     config.vm.define mastername do |master|
-        master.vm.box = "chef/centos-#{@vm_version}"
+        master.vm.box = "bento/centos-#{@vm_version}"
         master.vm.provider "virtualbox" do |v|
             v.name = mastername
             v.memory = @master_memory
@@ -177,7 +177,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         (2..@nr_hosts).each do |i|
           hostname = get_vm_name(i)
           config.vm.define hostname do |slave|
-                slave.vm.box = "chef/centos-#{@vm_version}"
+                slave.vm.box = "bento/centos-#{@vm_version}"
                 slave.vm.provider "virtualbox" do |v|
                     v.name = hostname
                     v.memory = @slave_memory
