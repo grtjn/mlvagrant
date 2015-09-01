@@ -2,13 +2,13 @@
 
 Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
-By default these scripts create 3 'bento/centos-6.7' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
+By default these scripts create 3 'grtjn/centos-6.6' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
 
 Each VM takes roughly 2.5Gb. The VM template, together with 3 VMs will take about 10Gb of disk space. In addition, each VM that is launched will claim 2Gb of RAM, and 2 CPU cores. Make sure you have sufficient resources!
 
 Special credits to [@peetkes](https://github.com/peetkes) and [@miguelrgonzalez](https://github.com/miguelrgonzalez) for giving me a head start with this. Thanks to anyone else that has provided help or feedback!
 
-Note: this project used to depend on chef/centos boxes, but they are no longer available. They have been 'moved' to bento, which only published latest release of each major version. I'm considering publishing my own set of centos baseboxes for reliability..
+Note: this project used to depend on chef/centos boxes, but they are no longer available. They have been 'moved' to bento, which only published latest release of each major version. I have recovered the chef base boxes from my local Vagrant cache, and republished on Atlas with my personal account: https://atlas.hashicorp.com/grtjn. I'll be using base boxes published there from now on.
 
 ## Getting started
 
@@ -99,7 +99,7 @@ Project name - defaults to current directory name
 VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 
 ### vm_version
-bento/centos base VM version - defaults to 6.7, allowed: 6.7/7.1
+CentOS base VM version - defaults to 6.6, allowed: 6.5/6.6/7.0/7.1
 
 ### ml_version
 Major MarkLogic release to install - defaults to 8, allowed: 5,6,7,8 (installers need to be present)
