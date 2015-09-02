@@ -127,6 +127,28 @@ The earlier version of mlvagrant was using public_network, and that will likely 
 
 That will go over all VMs, get its current IPs, and update the hosts tables on host and all VMs.
 
+## Scaling cluster size up or down
+
+Scaling up or down is not too big an issue, just make sure you follow below steps accurately:
+
+To scale up:
+
+- vi project.properties, increase nr_hosts
+- vagrant status, make note of names of not-created VMs
+- vagrant up --no-provision {names of 'not-created' VMs}
+- vagrant host-manager (will run across all VMs and host to update hosts tables with new VMs)
+- vagrant provision {names of 'not-created' VMs}
+
+To scale down:
+
+- vagrant status, make note of last VM name
+- go to Admin UI on last vm (http://lastvmname:8001/)
+- click on host details of that host, select Leave (you will need to move data, and remove all forests from that host first)
+- vagrant destroy {lastvmname}
+- vi project.properties, decrease nr_hosts setting
+
+Note: you can scale down multiple hosts, but make sure to remove VMs from last to first. VM names are calculated by incrementing from 1 to nr_hosts. So, better not to leave gaps.
+
 ## Pushing source code with git
 
 A local git repository with a post-receive hook is initialized for you, together with a user-account for it. All you need to do to push any git repository onto the server is (assuming project name 'vgtest'):
