@@ -40,11 +40,11 @@ if [ -n "${ml_installer}" ]; then
 elif [ "${ml_version}" = "5" ]; then
     installer="MarkLogic-5.0-6.1.x86_64.rpm"
 elif [ "${ml_version}" = "6" ]; then
-    installer="MarkLogic-6.0-5.3.x86_64.rpm"
+    installer="MarkLogic-6.0-6.x86_64.rpm"
 elif [ "${ml_version}" = "8" ]; then
     installer="MarkLogic-8.0-3.x86_64.rpm"
 else
-    installer="MarkLogic-7.0-5.1.x86_64.rpm"
+    installer="MarkLogic-7.0-5.2.x86_64.rpm"
 fi
 
 # Run MarkLogic installer
