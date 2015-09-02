@@ -65,19 +65,7 @@ To destroy all VMs (maybe to recreate them from scratch):
 
 - `vagrant destroy`
 
-## Pushing project code with git
-
-A local git repository with a post-receive hook is initialized for you, together with a user-account for it. All you need to do to push any git repository onto the server is (assuming project name 'vgtest'):
-
-- `git remote add vm vgtest@vgtest-ml1:/space/projects/vgtest.git`
-- `git push vm`
-
-The name of the user is derived from the folder name. The password is initialized to equal the user name, but can be changed if desired through:
-
-- `vagrant ssh vgtest-ml1`
-- `sudo passwd vgtest`
-
-## Customizing bootstrap
+## Configuration options
 
 The `project.properties` file contains various settings, amongst others:
 
@@ -130,3 +118,24 @@ Override hard-coded MarkLogic installers (file is searched in /space/software, o
 
 ### mlcp_installer
 Override hard-coded MLCP installers (file is searched in /space/software, or c:\space\software\ on Windows)
+
+## Using public_network (fixing IP issues)
+
+The earlier version of mlvagrant was using public_network, and that will likely reappear as option soon. Handing out of IPs in that case depends on the external DHCP of the network you happen to be connected with. If you are running on a laptop, and take it elsewhere, your laptop, and public_network VMs will get new IPs. At that moment the hosts tables become outdated. You can fix that with a simple command though:
+
+- vagrant hostmanager
+
+That will go over all VMs, get its current IPs, and update the hosts tables on host and all VMs.
+
+## Pushing source code with git
+
+A local git repository with a post-receive hook is initialized for you, together with a user-account for it. All you need to do to push any git repository onto the server is (assuming project name 'vgtest'):
+
+- `git remote add vm vgtest@vgtest-ml1:/space/projects/vgtest.git`
+- `git push vm`
+
+The name of the user is derived from the folder name. The password is initialized to equal the user name, but can be changed if desired through:
+
+- `vagrant ssh vgtest-ml1`
+- `sudo passwd vgtest`
+
