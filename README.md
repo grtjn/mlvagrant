@@ -34,6 +34,8 @@ You first need to download and install prerequisites and mlvagrant itself:
   - `sudo chmod 775 /opt/vagrant`
 - Copy mlvagrant/opt/vagrant to /opt/vagrant
 
+You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/vagrant. You will need an Enterprise (Developer) license for setting up clusters.
+
 Above steps need to taken only once. For every project you wish to create VMs, you simply take these steps:
 
 - Create a new project folder (anywhere you like) with a short name without spaces ('vgtest' for instance)
@@ -148,6 +150,12 @@ To scale down:
 - vi project.properties, decrease nr_hosts setting
 
 Note: you can scale down multiple hosts, but make sure to remove VMs from last to first. VM names are calculated by incrementing from 1 to nr_hosts. So, better not to leave gaps.
+
+## Fixing license issues
+
+If you don't provide a valid license upfront, the slave nodes likely won't be able connect to the master. Installation of MarkLogic 5 likely fails alltogether. You will need to open Admin UI on the master node (the first VM), apply a valid license, and then restart MarkLogic on all VMs. The lazy way to do the latter is to simply halt all VMs, and bring them up again (`vagrant halt ; vagrant up`)
+
+Note: the correct procedure is to install valid licenses on all slave nodes as well. Open Admin UI via those hosts, and apply a license there as well.
 
 ## Pushing source code with git
 
