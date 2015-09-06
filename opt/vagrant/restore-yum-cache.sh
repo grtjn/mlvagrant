@@ -4,31 +4,27 @@ echo "running $0 $@"
 os=`cat /etc/redhat-release`
 
 # no need for caching installs on demo servers
+if [ ! -d /var/cache/yum ]; then
+  mkdir /var/cache/yum
+fi
 if [ -d /vagrant ]; then
   if [[ $os == *"7."* ]]; then
-    if [ -d /space/software/yum-centos7 ]; then
-      cp -R /space/software/yum-centos7 /var/cache/yum
+    if [ -d /space/software/centos7 ]; then
+      cp -R /space/software/centos7/yum /var/cache/
+    fi
+  elif [[ $os == *"5."* ]]; then
+    if [ -d /space/software/centos5 ]; then
+      cp -R /space/software/centos5/yum /var/cache/
     fi
   else
-    if [ -d /space/software/yum ]; then
+    # assume centos6
+    if [ -d /space/software/centos6 ]; then
+      cp -R /space/software/centos6/yum /var/cache/
+    # backwards compat with old backup location
+    elif [ -d /space/software/yum ]; then
       cp -R /space/software/yum /var/cache/
     fi
   fi
   
   sed -i '/keepcache/ s/0/1/' /etc/yum.conf
 fi
-
-if [[ $os == *"7."* ]]; then
-  rpm --import https://fedoraproject.org/static/352C64E5.txt
-  rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-else
-  rpm --import https://fedoraproject.org/static/0608B895.txt
-  rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
-fi
-
-yum -y update
-if [[ $os == *"7."* ]]; then
-  yum groups mark install "Development Tools"
-  yum groups mark convert "Development Tools"
-fi
-yum -y groupinstall "Development Tools"
