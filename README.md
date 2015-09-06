@@ -88,6 +88,8 @@ Project name - defaults to current directory name
 ### vm_name
 VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 
+**IMPORTANT: DON'T CHANGE ONCE YOU HAVE CREATED THE VM'S!!**
+
 ### vm_version
 CentOS base VM version - defaults to 6.6, allowed: 6.5/6.6/7.0/7.1
 

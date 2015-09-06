@@ -1,7 +1,9 @@
 #! /bin/sh
 echo "running $0 $@"
 
-yum -y install nodejs npm --enablerepo=epel
+yum -y install curl epel-release # epel-release necessary to install nodejs/npm on CentOS 5, and no harm otherwise
+curl --silent --location https://rpm.nodesource.com/setup | bash -
+yum -y install gcc-c++ make nodejs
 
 if [ hash bower 2> /dev/null ]; then
   echo 'Bower is already installed'

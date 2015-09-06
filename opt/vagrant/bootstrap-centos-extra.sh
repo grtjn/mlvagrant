@@ -12,6 +12,7 @@ fi
 
 # Run the installers
 sudo /opt/vagrant/restore-yum-cache.sh
+sudo /opt/vagrant/update-os.sh
 sudo /opt/vagrant/install-ml-centos.sh $4
 sudo /opt/vagrant/setup-ml-extra.sh $@
 sudo /opt/vagrant/backup-yum-cache.sh

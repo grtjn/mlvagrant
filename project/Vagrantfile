@@ -117,6 +117,11 @@ if @command == "status" or @command == "up" or @command == "provision"
     puts "Using DHCP for Private Network"
   end
   puts ""
+  
+  if @command == "up" and @vm_version == "5.11" and @ml_version == "8"
+    puts "MarkLogic 8 NOT supported on CentOS 5! Try MarkLogic 7, or CentOS 6.."
+    abort "Bailing out.."
+  end
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -130,7 +135,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.hostmanager.ip_resolver = proc do |machine|
         result = ""
         begin
-          machine.communicate.execute("ifconfig eth1") do |type, data|
+          machine.communicate.execute("/sbin/ifconfig eth1") do |type, data|
             result << data if type == :stdout
           end
         rescue

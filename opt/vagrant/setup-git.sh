@@ -10,11 +10,11 @@ mkdir -p /space/projects/$1.git
 # initialize the git repo
 cd /space/projects/$1.git
 if [ ! -f HEAD ]; then
-    git --bare init
+  git --bare init
 fi
 if [ ! -f hooks/post-receive ]; then
-    printf "#!/bin/sh\nin=\$(cat)\nbranch=\${in##*/}\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f \$branch\nchown -R :sshuser /space/projects/$1.live\nchmod -R g+rw /space/projects/$1.live\n" > hooks/post-receive
-    chmod 755 hooks/post-receive
+  printf "#!/bin/sh\nin=\$(cat)\nbranch=\${in##*/}\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f \$branch\nchown -R :sshuser /space/projects/$1.live\nchmod -R g+rw /space/projects/$1.live\n" > hooks/post-receive
+  chmod 755 hooks/post-receive
 fi
 
 # create a project deploy dir

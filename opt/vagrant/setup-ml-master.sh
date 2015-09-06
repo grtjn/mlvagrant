@@ -80,125 +80,139 @@ echo "VERSION is ${VERSION}"
 echo "USER is ${USER}"
 echo "LICENSEE is ${LICENSEE}"
 
+# Make sure curl is installed
+yum -y install curl
+
 # Suppress progress meter, but still show errors
 CURL="curl -s -S"
 #for debugging:
 #CURL="curl -v"
 
+# Backwards-compat with old curl
+BOOTSTRAP_HOST_ENC="$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$BOOTSTRAP_HOST")"
+LICENSE_ENC="$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$LICENSE")"
+LICENSEE_ENC="$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$LICENSEE")"
+
 # Add authentication related options, required once security is initialized
 AUTH_CURL="${CURL} --${AUTH_MODE} --user ${USER}:${PASS}"
 
 if [ "$VERSION" -eq "5" ] || [ "$VERSION" -eq "6" ]; then
-	
-	echo Uploading license..
-	$CURL -i -X POST \
-	    --data-urlencode "license-key=$LICENSE" \
-	    --data-urlencode "licensee=$LICENSEE" \
-	    --data-urlencode "ok=ok" \
-	    http://${BOOTSTRAP_HOST}:8001/license-go.xqy
-	service MarkLogic restart
-	echo "Waiting for server restart.."
-	sleep 5
+  
+  echo Uploading license..
+  $CURL -i -X POST \
+        --data "license-key=$LICENSE_ENC" \
+        --data "licensee=$LICENSEE_ENC" \
+        --data "ok=ok" \
+        http://${BOOTSTRAP_HOST}:8001/license-go.xqy
+  
+  /sbin/service MarkLogic restart
+  echo "Waiting for server restart.."
+  sleep 5
 
-	echo Agreeing license..
-	$CURL -i -X GET \
-	    http://${BOOTSTRAP_HOST}:8001/agree.xqy > agree.html
-	LOCATION=`grep "Location:" agree.html \
-		| perl -p -e 's/^.*?Location:\s+([^\r\n\s]+).*/$1/'`
-	echo "'$LOCATION'"
-	
-	$CURL -o "agree.html" -X GET \
-	    "http://${BOOTSTRAP_HOST}:8001/${LOCATION}"
-	AGREE=`grep "accepted-agreement" agree.html \
-		| sed 's%^.*value="\(.*\)".*$%\1%'`
-	
-	echo "AGREEMENT is $AGREE"
-	$CURL -X POST \
-	    --data-urlencode "accepted-agreement=$AGREE" \
-	    --data-urlencode "ok=ok" \
-	    http://${BOOTSTRAP_HOST}:8001/agree-go.xqy
-	service MarkLogic restart
-	echo "Waiting for server restart.."
-	sleep 5
-	
-	echo Initializing services..
-	$CURL -X POST \
-	    --data-urlencode "ok=ok" \
-	    http://${BOOTSTRAP_HOST}:8001/initialize-go.xqy
-	service MarkLogic restart
-	echo "Waiting for server restart.."
-	sleep 5
-	
-	echo Initializing security..
-	$CURL -X POST \
-	    --data-urlencode "user=$USER" \
-	    --data-urlencode "password1=$PASS" \
-	    --data-urlencode "password2=$PASS" \
-	    --data-urlencode "realm=$SEC_REALM" \
-	    --data-urlencode "ok=ok" \
-	    http://${BOOTSTRAP_HOST}:8001/security-install-go.xqy
-	service MarkLogic restart
-	echo "Waiting for server restart.."
-	sleep 5
-	
-	rm *.html
+  echo Agreeing license..
+  $CURL -i -X GET \
+      http://${BOOTSTRAP_HOST}:8001/agree.xqy > agree.html
+  LOCATION=`grep "Location:" agree.html \
+    | perl -p -e 's/^.*?Location:\s+([^\r\n\s]+).*/$1/'`
+  echo "'$LOCATION'"
+  
+  $CURL -o "agree.html" -X GET \
+      "http://${BOOTSTRAP_HOST}:8001/${LOCATION}"
+  AGREE=`grep "accepted-agreement" agree.html \
+    | sed 's%^.*value="\(.*\)".*$%\1%'`
+  
+  # Backwards-compat with old curl
+  AGREE_ENC="$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$AGREE")"
+  
+  echo "AGREEMENT is $AGREE"
+  $CURL -X POST \
+        --data "accepted-agreement=$AGREE_ENC" \
+        --data "ok=ok" \
+        http://${BOOTSTRAP_HOST}:8001/agree-go.xqy
+  
+  /sbin/service MarkLogic restart
+  echo "Waiting for server restart.."
+  sleep 5
+  
+  echo Initializing services..
+  $CURL -X POST \
+        --data "ok=ok" \
+        http://${BOOTSTRAP_HOST}:8001/initialize-go.xqy
+  
+  /sbin/service MarkLogic restart
+  echo "Waiting for server restart.."
+  sleep 5
+  
+  echo Initializing security..
+  $CURL -X POST \
+        --data "user=$USER" \
+        --data "password1=$PASS" \
+        --data "password2=$PASS" \
+        --data "realm=$SEC_REALM" \
+        --data "ok=ok" \
+        http://${BOOTSTRAP_HOST}:8001/security-install-go.xqy
+  
+  /sbin/service MarkLogic restart
+  echo "Waiting for server restart.."
+  sleep 5
+  
+  rm *.html
 else
-	
-	#######################################################
-	# Bring up the first (or only) host in the cluster. The following
-	# requests are sent to the target host:
-	#   (1) POST /admin/v1/init
-	#   (2) POST /admin/v1/instance-admin?admin-user=X&admin-password=Y&realm=Z
-	# GET /admin/v1/timestamp is used to confirm restarts.
+  
+  #######################################################
+  # Bring up the first (or only) host in the cluster. The following
+  # requests are sent to the target host:
+  #   (1) POST /admin/v1/init
+  #   (2) POST /admin/v1/instance-admin?admin-user=X&admin-password=Y&realm=Z
+  # GET /admin/v1/timestamp is used to confirm restarts.
 
-	# (1) Initialize the server
-	echo "Initializing $BOOTSTRAP_HOST and setting license..."
-	$CURL -X POST -H "Content-type=application/x-www-form-urlencoded" \
-	    --data-urlencode "license-key=$LICENSE" \
-	    --data-urlencode "licensee=$LICENSEE" \
-	    http://${BOOTSTRAP_HOST}:8001/admin/v1/init
-	sleep 10
+  # (1) Initialize the server
+  echo "Initializing $BOOTSTRAP_HOST and setting license..."
+  $CURL -X POST -H "Content-type=application/x-www-form-urlencoded" \
+        --data "license-key=$LICENSE_ENC" \
+        --data "licensee=$LICENSEE_ENC" \
+        http://${BOOTSTRAP_HOST}:8001/admin/v1/init
+  sleep 10
 
-	# (2) Initialize security and, optionally, licensing. Capture the last
-	#     restart timestamp and use it to check for successful restart.
-	echo "Initializing security for $BOOTSTRAP_HOST..."
-	TIMESTAMP=`$CURL -X POST \
-	   -H "Content-type: application/x-www-form-urlencoded" \
-	   --data "admin-username=${USER}" --data "admin-password=${PASS}" \
-	   --data "realm=${SEC_REALM}" \
-	   http://${BOOTSTRAP_HOST}:8001/admin/v1/instance-admin \
-	   | grep "last-startup" \
-	   | sed 's%^.*<last-startup.*>\(.*\)</last-startup>.*$%\1%'`
-	if [ "$TIMESTAMP" == "" ]; then
-	  echo "ERROR: Failed to get instance-admin timestamp." >&2
-	  exit 1
-	fi
+  # (2) Initialize security and, optionally, licensing. Capture the last
+  #     restart timestamp and use it to check for successful restart.
+  echo "Initializing security for $BOOTSTRAP_HOST..."
+  TIMESTAMP=`$CURL -X POST \
+     -H "Content-type: application/x-www-form-urlencoded" \
+     --data "admin-username=${USER}" --data "admin-password=${PASS}" \
+     --data "realm=${SEC_REALM}" \
+     http://${BOOTSTRAP_HOST}:8001/admin/v1/instance-admin \
+     | grep "last-startup" \
+     | sed 's%^.*<last-startup.*>\(.*\)</last-startup>.*$%\1%'`
+  if [ "$TIMESTAMP" == "" ]; then
+    echo "ERROR: Failed to get instance-admin timestamp." >&2
+    exit 1
+  fi
 
-	# Test for successful restart
-	restart_check $BOOTSTRAP_HOST $TIMESTAMP $LINENO
+  # Test for successful restart
+  restart_check $BOOTSTRAP_HOST $TIMESTAMP $LINENO
 fi
 
 echo "Removing network suffix from hostname"
 
 $AUTH_CURL -o "hosts.html" -X GET \
-    "http://${BOOTSTRAP_HOST}:8001/host-summary.xqy?section=host"
+           "http://${BOOTSTRAP_HOST}:8001/host-summary.xqy?section=host"
 HOST_ID=`grep "statusfirstcell" hosts.html \
-	| grep ${BOOTSTRAP_HOST} \
-	| sed 's%^.*href="host-admin.xqy?section=host&amp;host=\([^"]*\)".*$%\1%'`
+  | grep ${BOOTSTRAP_HOST} \
+  | sed 's%^.*href="host-admin.xqy?section=host&amp;host=\([^"]*\)".*$%\1%'`
 echo "HOST_ID is $HOST_ID"
 
 $AUTH_CURL -X POST \
-	--data-urlencode "host=$HOST_ID" \
-	--data-urlencode "section=host" \
-	--data-urlencode "/ho:hosts/ho:host/ho:host-name=${BOOTSTRAP_HOST}" \
-	--data-urlencode "ok=ok" \
-	"http://${BOOTSTRAP_HOST}:8001/host-admin-go.xqy"
+           --data "host=$HOST_ID" \
+           --data "section=host" \
+           --data "/ho:hosts/ho:host/ho:host-name=${BOOTSTRAP_HOST_ENC}" \
+           --data "ok=ok" \
+           "http://${BOOTSTRAP_HOST}:8001/host-admin-go.xqy"
 
-service MarkLogic restart
+/sbin/service MarkLogic restart
 echo "Waiting for server restart.."
 sleep 5
 
 rm *.html
 
 echo "Initialization complete for $BOOTSTRAP_HOST..."
-exit 0
