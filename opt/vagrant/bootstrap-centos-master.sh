@@ -12,12 +12,12 @@ fi
 
 # Run the installers.
 sudo /opt/vagrant/restore-yum-cache.sh
-sudo /opt/vagrant/update-os.sh
+sudo /opt/vagrant/update-os.sh $4
 sudo /opt/vagrant/install-ml-centos.sh $4
 sudo /opt/vagrant/setup-ml-master.sh $1 $2 $3
-sudo /opt/vagrant/install-node.sh
+sudo /opt/vagrant/install-node.sh $4
 sudo /opt/vagrant/install-mlcp.sh $4
 sudo /opt/vagrant/install-user.sh $4
 sudo /opt/vagrant/setup-git.sh $4
-sudo /opt/vagrant/setup-tomcat.sh
+sudo /opt/vagrant/setup-tomcat.sh $4
 sudo /opt/vagrant/backup-yum-cache.sh

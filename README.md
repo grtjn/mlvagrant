@@ -2,7 +2,7 @@
 
 Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
-By default these scripts create 3 'grtjn/centos-6.6' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
+By default these scripts create 3 'grtjn/centos-6.7' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
 
 Each VM takes roughly 2.5Gb. The VM template, together with 3 VMs will take about 10Gb of disk space. In addition, each VM that is launched will claim 2Gb of RAM, and 2 CPU cores. Make sure you have sufficient resources!
 
@@ -33,6 +33,8 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Make sure Vagrant has write access
   - `sudo chmod 775 /opt/vagrant`
 - Copy mlvagrant/opt/vagrant to /opt/vagrant
+
+**IMPORTANT:**
 
 You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/vagrant. You will need an Enterprise (Developer) license for setting up clusters.
 
@@ -91,7 +93,9 @@ VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 **IMPORTANT: DON'T CHANGE ONCE YOU HAVE CREATED THE VM'S!!**
 
 ### vm_version
-CentOS base VM version - defaults to 6.6, allowed: 6.5/6.6/7.0/7.1
+CentOS base VM version - defaults to 6.7, allowed: 5.11/6.5/6.6/6.7/7.0/7.1
+
+Note: CentOS 5(.11) does not support MarkLogic 8
 
 ### ml_version
 Major MarkLogic release to install - defaults to 8, allowed: 5,6,7,8 (installers need to be present)
@@ -123,7 +127,52 @@ Override hard-coded MarkLogic installers (file is searched in /space/software, o
 ### mlcp_installer
 Override hard-coded MLCP installers (file is searched in /space/software, or c:\space\software\ on Windows)
 
-## Using public_network (fixing IP issues)
+
+### update_os
+Run full OS updates - defaults to false
+
+Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.7+ resp 7.1+)
+
+### install_dev_tools
+Install group "Development tools" - defaults to false
+
+### install_zip
+Install zip/unzip - defaults to true
+
+Note: Zip/unzip **not** required for MLCP (provided through Java)
+
+### install_java
+Install Java - defaults to true
+
+Note: necessary for MLCP
+Note: installs JDK 8 currently
+
+### install_mlcp
+Install MarkLogic Content Pump - defaults to true
+
+Note: installs an MLCP version that matches ml_version, unless an explicit mlcp_installer was specified
+
+### install_nodejs
+Install Node.js, npm, bower, gulp, forever (globally) - defaults to true
+
+## install_ruby
+Install Ruby - default to true
+
+Note: Ruby is mostly already installed on CentOS, this is just to be certain
+
+### install_git
+Install Git command-line tools - defaults to true
+
+### install_git_project
+Initializes a bare Git repository under /space/projects, along with a user named {project_name} to use it
+
+### install_tomcat
+Install Tomcat, and enable the service - defaults to true
+
+Note: Tomcat could be pre-installed, but usually isn't enabled by default. This will make sure it is installed, and enabled.
+Note: on CentOS 5 you get Tomcat 5 (tomcat5), on CentOS 6 you get Tomcat 6 (tomcat6), on CentOS 7 you get Tomcat 7 (tomcat)
+
+## Fixing IP issues with public_network
 
 The earlier version of mlvagrant was using public_network, and that will likely reappear as option soon. Handing out of IPs in that case depends on the external DHCP of the network you happen to be connected with. If you are running on a laptop, and take it elsewhere, your laptop, and public_network VMs will get new IPs. At that moment the hosts tables become outdated. You can fix that with a simple command though:
 

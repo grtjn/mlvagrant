@@ -72,7 +72,7 @@ end
 @project_name = ENV["MLV_PROJECT_NAME"] || @properties["PROJECT_NAME"] || File.basename(Dir.getwd)
 
 @vm_name = ENV["MLV_VM_NAME"] || @properties["VM_NAME"] || "{project_name}-ml{i}"
-@vm_version = ENV["MLV_VM_VERSION"] || @properties["VM_VERSION"] || "6.6"
+@vm_version = ENV["MLV_VM_VERSION"] || @properties["VM_VERSION"] || "6.7"
 @ml_version = ENV["MLV_ML_VERSION"] || @properties["ML_VERSION"] || "8"
 @nr_hosts = (ENV["MLV_NR_HOSTS"] || @properties["NR_HOSTS"] || "3").to_i
 @master_memory = (ENV["MLV_MASTER_MEMORY"] || @properties["MASTER_MEMORY"] || "2048").to_i

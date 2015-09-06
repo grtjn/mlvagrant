@@ -82,6 +82,8 @@ echo "LICENSEE is ${LICENSEE}"
 
 # Make sure curl is installed
 yum -y install curl
+# Make sure perl URI::Escape is installed
+yum -y install perl-URI
 
 # Suppress progress meter, but still show errors
 CURL="curl -s -S"
