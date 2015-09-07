@@ -174,7 +174,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         if @shared_folder_host != "" and  @shared_folder_guest != ""
           master.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
         end
-        master.vm.provision :hostmanager, run: "always"
+        master.vm.provision :hostmanager
         master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name]
     end
 
@@ -200,7 +200,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 if @shared_folder_host != "" and  @shared_folder_guest != ""
                   slave.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
                 end
-                slave.vm.provision :hostmanager, run: "always"
+                slave.vm.provision :hostmanager
                 slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name]
             end
         end
