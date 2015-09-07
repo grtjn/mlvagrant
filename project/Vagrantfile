@@ -40,6 +40,7 @@ def load_properties(properties_filename, prefix = "")
           if i
             key = prefix + line[0..i - 1].strip.upcase
             value = line[i + 1..-1].strip
+            value.gsub!(/^"(.*)"$/, '\1')
             properties[key] = value
           end
         end
@@ -81,6 +82,7 @@ end
 @slave_cpus = (ENV["MLV_SLAVE_CPUS"] || @properties["SLAVE_CPUS"] || @master_cpus.to_s).to_i
 @ml_installer = ENV["MLV_ML_INSTALLER"] || @properties["ML_INSTALLER"] || ""
 @mlcp_installer = ENV["MLV_MLCP_INSTALLER"] || @properties["MLCP_INSTALLER"] || ""
+@public_network = ENV["MLV_PUBLIC_NETWORK"] || @properties["PUBLIC_NETWORK"] || ""
 @priv_net_ip = ENV["MLV_PRIV_NET_IP"] || @properties["PRIV_NET_IP"] || ""
 @shared_folder_host = ENV["MLV_SHARED_FOLDER_HOST"] || @properties["SHARED_FOLDER_HOST"] || ""
 @shared_folder_guest = ENV["MLV_SHARED_FOLDER_GUEST"] || @properties["SHARED_FOLDER_GUEST"] || ""
@@ -110,7 +112,10 @@ if @command == "status" or @command == "up" or @command == "provision"
     puts "shared_folder_host=#{@shared_folder_host}"
     puts "shared_folder_guest=#{@shared_folder_guest}"
   end
-  if @priv_net_ip != ""
+  if @public_network != ""
+    puts ""
+    puts "WARN: Using DHCP on Public Network '#{@public_network}'!"
+  elsif @priv_net_ip != ""
     puts "priv_net_ip=#{@priv_net_ip}"
   else
     puts ""
@@ -163,7 +168,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             v.cpus = @master_cpus
         end
         master.vm.hostname = mastername
-        if @priv_net_ip != ""
+        if @public_network != ""
+          master.vm.network "public_network", bridge: @public_network
+        elsif @priv_net_ip != ""
           master.vm.network "private_network", ip: @priv_net_ip
         else
           master.vm.network "private_network", type: "dhcp"
@@ -189,7 +196,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     v.cpus = @slave_cpus
                 end
                 slave.vm.hostname = hostname
-                if @priv_net_ip != ""
+                if @public_network != ""
+                  slave.vm.network "public_network", bridge: @public_network
+                elsif @priv_net_ip != ""
                   slave.vm.network "private_network", ip: inc_ip(@priv_net_ip, i)
                 else
                   slave.vm.network "private_network", type: "dhcp"
