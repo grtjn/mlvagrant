@@ -36,7 +36,7 @@ You first need to download and install prerequisites and mlvagrant itself:
 
 **IMPORTANT:**
 
-You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/vagrant. You will need an Enterprise (Developer) license for setting up clusters.
+You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/vagrant. You will need an Enterprise (Developer) license for setting up clusters. For project-specific licenses, copy these files next to project.properties first, and edit them there.
 
 Above steps need to taken only once. For every project you wish to create VMs, you simply take these steps:
 
