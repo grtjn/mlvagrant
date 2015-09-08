@@ -2,6 +2,19 @@
 
 Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
+Key feature:
+
+- Easy creation of VirtualBox VMs
+- Uses pre-built CentOS Vagrant base boxes
+- Supports MarkLogic 5 up to 8
+- Supports CentOS 5.11 up to 7.1
+- Automatic setup of cluster
+- Also installs MLCP, Java, NodeJS, Ruby, etc
+- Highly configurable
+- Scripts can be used for other servers as well
+
+## Description
+
 By default these scripts create 3 'grtjn/centos-6.7' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
 
 Each VM takes roughly 2.5Gb. The VM template, together with 3 VMs will take about 10Gb of disk space. In addition, each VM that is launched will claim 2Gb of RAM, and 2 CPU cores. Make sure you have sufficient resources!
