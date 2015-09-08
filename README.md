@@ -258,17 +258,17 @@ The bootstrap scripts contain a few safeguards that should allow running it outs
 - The first should contain:
 
 ```bash
-    #! /bin/sh
-    echo "running $0 $@"
-    ./bootstrap-centos-master.sh -v 8 <node1 name/ip> <projectname>
+#! /bin/sh
+echo "running $0 $@"
+./bootstrap-centos-master.sh -v 8 <node1 name/ip> <projectname>
 ```
 
 - Subsequent ones should contain:
 
 ```bash
-    #! /bin/sh
-    echo "running $0 $@"
-    ./bootstrap-centos-extra.sh -v 8 <node1 name/ip> <nodeN name/ip> <projectname>
+#! /bin/sh
+echo "running $0 $@"
+./bootstrap-centos-extra.sh -v 8 <node1 name/ip> <nodeN name/ip> <projectname>
 ```
 
 - Note: myproject can be any name, try to keep it short though
