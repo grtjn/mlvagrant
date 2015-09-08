@@ -35,7 +35,7 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Create /space/software (**For Windows**: `c:\space\software`):
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
-  - `sudo chmod 775 /space/software`
+  - `sudo chmod 777 /space/software`
 - Download [MarkLogic 8.0-3 for CentOS](http://developer.marklogic.com/products) (login required)
 - Download [MLCP 1.3-3 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-1.3-3-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
@@ -45,7 +45,7 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Create /opt/vagrant (**For Windows**: `c:\opt\vagrant`):
   - `sudo mkdir -p /opt/vagrant`
 - Make sure Vagrant has write access
-  - `sudo chmod 775 /opt/vagrant`
+  - `sudo chmod 777 /opt/vagrant`
 - Copy mlvagrant/opt/vagrant to /opt/vagrant
 
 **IMPORTANT:**
