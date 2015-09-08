@@ -5,6 +5,7 @@ Scripts for bootstrapping a local MarkLogic cluster for development purposes usi
 Key features:
 
 - Easy creation of VirtualBox VMs
+- Works on Windows, MacOS, and Linux
 - Uses pre-built CentOS Vagrant base boxes
 - Supports MarkLogic 5 up to 8
 - Supports CentOS 5.11 up to 7.1
