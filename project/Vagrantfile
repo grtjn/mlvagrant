@@ -56,6 +56,7 @@ end
 def get_vm_name(i)
   name = "#{@vm_name}"
   name.gsub!(/\{project_name\}/, @project_name)
+  name.gsub!(/\{vm_version\}/, @vm_version)
   name.gsub!(/\{ml_version\}/, @ml_version)
   name.gsub!(/\{i\}/, i.to_s)
   name
