@@ -154,6 +154,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
         #vb.gui = true # for debugging
     end
+    
+    config.vm.provider :digital_ocean do |provider, override|
+        override.ssh.private_key_path = './id_rsa'
+        override.vm.box = 'digital_ocean'
+        override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+
+        provider.token = 'insertHere'
+        provider.image = 'centos-6-5-x64'
+        provider.region = 'sgp1'
+        provider.size = '1gb'
+    end
 
     config.vm.define mastername do |master|
         master.vm.box = "grtjn/centos-#{@vm_version}"
