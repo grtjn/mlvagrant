@@ -2,6 +2,20 @@
 
 Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
+Key features:
+
+- Easy creation of VirtualBox VMs
+- Works on Windows, MacOS, and Linux
+- Uses pre-built CentOS Vagrant base boxes
+- Supports MarkLogic 5 up to 8
+- Supports CentOS 5.11 up to 7.1
+- Automatic setup of cluster
+- Also installs MLCP, Java, NodeJS, Ruby, etc
+- Highly configurable
+- Scripts can be used for other servers as well
+
+## Description
+
 By default these scripts create 3 'grtjn/centos-6.7' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
 
 Each VM takes roughly 2.5Gb. The VM template, together with 3 VMs will take about 10Gb of disk space. In addition, each VM that is launched will claim 2Gb of RAM, and 2 CPU cores. Make sure you have sufficient resources!
@@ -21,7 +35,7 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Create /space/software (**For Windows**: `c:\space\software`):
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
-  - `sudo chmod 775 /space/software`
+  - `sudo chmod 777 /space/software`
 - Download [MarkLogic 8.0-3 for CentOS](http://developer.marklogic.com/products) (login required)
 - Download [MLCP 1.3-3 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-1.3-3-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
@@ -31,12 +45,12 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Create /opt/vagrant (**For Windows**: `c:\opt\vagrant`):
   - `sudo mkdir -p /opt/vagrant`
 - Make sure Vagrant has write access
-  - `sudo chmod 775 /opt/vagrant`
+  - `sudo chmod 777 /opt/vagrant`
 - Copy mlvagrant/opt/vagrant to /opt/vagrant
 
 **IMPORTANT:**
 
-You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/vagrant. You will need an Enterprise (Developer) license for setting up clusters.
+You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/vagrant. You will need an Enterprise (Developer) license for setting up clusters. For project-specific licenses, copy these files next to project.properties first, and edit them there.
 
 Above steps need to taken only once. For every project you wish to create VMs, you simply take these steps:
 
@@ -115,6 +129,11 @@ Memory assigned to each slave node in cluster - defaults to same as master_memor
 ### slave_cpus
 Number of cpus assigned to each slave node in cluster - defaults to same as master_cpus
 
+### public_network
+Name of public_network to use in Vagrant, for instance "en0: Wi-Fi (AirPort)" - defaults to ""
+
+Note: enabling this makes your VMs accessible from outside, beware of security leaks
+
 ### priv_net_ip
 Assign dedicated private IP to master node - slaves get same ip + i
 
@@ -126,7 +145,6 @@ Override hard-coded MarkLogic installers (file is searched in /space/software, o
 
 ### mlcp_installer
 Override hard-coded MLCP installers (file is searched in /space/software, or c:\space\software\ on Windows)
-
 
 ### update_os
 Run full OS updates - defaults to false
@@ -220,3 +238,57 @@ The name of the user is derived from the folder name. The password is initialize
 - `vagrant ssh vgtest-ml1`
 - `sudo passwd vgtest`
 
+## Using bootstrap script without Vagrant
+
+The bootstrap scripts contain a few safeguards that should allow running it outside (ML)Vagrant as well. I have used them on a fair number of internal demo-servers with success, also to create fully operational clusters in just a few steps. The procedure is a little different, but will save you a lot of manual typing:
+
+-	Open an SSH connection to each server, create the folders for installers and scripts, and change ownership to yourself:
+  - sudo mkdir -p /space/software
+  - sudo mkdir -p /opt/vagrant
+  - sudo chown $USER:sshuser /space/software
+  - sudo chown $USER:sshuser /opt/vagrant
+- Download the relevant ML and MLCP installers from http://developer.marklogic.com to your local machine.
+- Download the mlvagrant file from github (git clone or download the release zip)
+- Upload installers, and scripts to the first server using scp:
+  - scp Downloads/MarkLogic-8.0-3.x86_64.rpm <node1 name/ip>:/space/software/
+  - scp Downloads/mlcp-Hadoop2-1.3-3-bin.zip <node1 name/ip>:/space/software/
+  - scp vagrant/* <node1 name/ip>:/opt/vagrant/
+- On first server create files /opt/vagrant/bootstrap-node1.sh, /opt/vagrant/bootstrap-node2.sh, /opt/vagrant/bootstrap-node3.sh, .. (one for each server)
+- Note: there is a bootstrap-server.sh script that you could take as example.
+- Make them executable: chmod +x /opt/vagrant/*.sh
+- The first should contain:
+
+```bash
+#! /bin/sh
+echo "running $0 $@"
+./bootstrap-centos-master.sh -v 8 <node1 name/ip> <projectname>
+```
+
+- Subsequent ones should contain:
+
+```bash
+#! /bin/sh
+echo "running $0 $@"
+./bootstrap-centos-extra.sh -v 8 <node1 name/ip> <nodeN name/ip> <projectname>
+```
+
+- Note: myproject can be any name, try to keep it short though
+- From first server 'forward' installers and scripts to all others using scp:
+  - scp /space/software/MarkLogic-8.0-3.x86_64.rpm <nodeN name/ip>:/space/software/
+  - scp /space/software/mlcp-Hadoop2-1.3-3-bin.zip <nodeN name/ip>:/space/software/
+  - scp /opt/vagrant/* <nodeN name/ip>:/opt/vagrant/
+
+Next, initiate MarkLogic bootstrapping on every machine, one by one. This will also by default install MLCP, Java, Git, NodeJS, and other useful tools, and make the MarkLogic instances join together in a cluster:
+
+- On the first server:
+  - cd /opt/vagrant/
+  - ./bootstrap-node1.sh
+  - wait till it finished (may take several minutes, this part requires internet access)
+  - Note: a few steps might throw warnings or errors, but as long as next step succeeds, continue
+  - Open http://<node1 name/ip>:8001/ (MarkLogic Admin UI)
+  - Verify if host name of first node is correct, meaning that other hosts must be able to find this host using whatever is specified as host name (can be IP, just a name, or a full DNS name). If necessary add names to /etc/hosts on each server to make them find each other. That is essential for setting up the cluster.
+- Repeat for subsequent nodes, with the appropriate bootstrap script. You should see a new host appear in the MarkLogic Admin UI each time, check host name of each newly added host as you go.
+- Finally, as a good practice: create a personalized admin account (user with your name, and admin role), and preferably a second one for someone else.
+- Check if you can login with that into the Admin ui, and then consider removing the admin/admin account (not required, but good practice as well)
+
+Congratulations, you should have a working cluster. Now you can start deploying your MarkLogic applications on it!

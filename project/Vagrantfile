@@ -40,6 +40,7 @@ def load_properties(properties_filename, prefix = "")
           if i
             key = prefix + line[0..i - 1].strip.upcase
             value = line[i + 1..-1].strip
+            value.gsub!(/^"(.*)"$/, '\1')
             properties[key] = value
           end
         end
@@ -55,6 +56,7 @@ end
 def get_vm_name(i)
   name = "#{@vm_name}"
   name.gsub!(/\{project_name\}/, @project_name)
+  name.gsub!(/\{vm_version\}/, @vm_version)
   name.gsub!(/\{ml_version\}/, @ml_version)
   name.gsub!(/\{i\}/, i.to_s)
   name
@@ -81,6 +83,7 @@ end
 @slave_cpus = (ENV["MLV_SLAVE_CPUS"] || @properties["SLAVE_CPUS"] || @master_cpus.to_s).to_i
 @ml_installer = ENV["MLV_ML_INSTALLER"] || @properties["ML_INSTALLER"] || ""
 @mlcp_installer = ENV["MLV_MLCP_INSTALLER"] || @properties["MLCP_INSTALLER"] || ""
+@public_network = ENV["MLV_PUBLIC_NETWORK"] || @properties["PUBLIC_NETWORK"] || ""
 @priv_net_ip = ENV["MLV_PRIV_NET_IP"] || @properties["PRIV_NET_IP"] || ""
 @shared_folder_host = ENV["MLV_SHARED_FOLDER_HOST"] || @properties["SHARED_FOLDER_HOST"] || ""
 @shared_folder_guest = ENV["MLV_SHARED_FOLDER_GUEST"] || @properties["SHARED_FOLDER_GUEST"] || ""
@@ -110,7 +113,10 @@ if @command == "status" or @command == "up" or @command == "provision"
     puts "shared_folder_host=#{@shared_folder_host}"
     puts "shared_folder_guest=#{@shared_folder_guest}"
   end
-  if @priv_net_ip != ""
+  if @public_network != ""
+    puts ""
+    puts "WARN: Using DHCP on Public Network '#{@public_network}'!"
+  elsif @priv_net_ip != ""
     puts "priv_net_ip=#{@priv_net_ip}"
   else
     puts ""
@@ -174,7 +180,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             v.cpus = @master_cpus
         end
         master.vm.hostname = mastername
-        if @priv_net_ip != ""
+        if @public_network != ""
+          master.vm.network "public_network", bridge: @public_network
+        elsif @priv_net_ip != ""
           master.vm.network "private_network", ip: @priv_net_ip
         else
           master.vm.network "private_network", type: "dhcp"
@@ -185,7 +193,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         if @shared_folder_host != "" and  @shared_folder_guest != ""
           master.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
         end
-        master.vm.provision :hostmanager, run: "always"
+        master.vm.provision :hostmanager
         master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name]
     end
 
@@ -200,7 +208,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     v.cpus = @slave_cpus
                 end
                 slave.vm.hostname = hostname
-                if @priv_net_ip != ""
+                if @public_network != ""
+                  slave.vm.network "public_network", bridge: @public_network
+                elsif @priv_net_ip != ""
                   slave.vm.network "private_network", ip: inc_ip(@priv_net_ip, i)
                 else
                   slave.vm.network "private_network", type: "dhcp"
@@ -211,7 +221,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 if @shared_folder_host != "" and  @shared_folder_guest != ""
                   slave.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
                 end
-                slave.vm.provision :hostmanager, run: "always"
+                slave.vm.provision :hostmanager
                 slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name]
             end
         end

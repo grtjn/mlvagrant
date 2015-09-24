@@ -6,6 +6,8 @@ if [ -f /vagrant/project.properties ]; then
   sed 's/.*=/\L&/' /vagrant/project.properties > /tmp/$4.project.properties
 elif [ -f project.properties ]; then
   sed 's/.*=/\L&/' project.properties > /tmp/$4.project.properties
+elif [ -f /opt/vagrant/project.properties ]; then
+  sed 's/.*=/\L&/' /opt/vagrant/project.properties > /tmp/$4.project.properties
 else
   printf "ml_version=$2\n" > /tmp/$4.project.properties
 fi
