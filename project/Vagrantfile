@@ -88,6 +88,12 @@ end
 @shared_folder_host = ENV["MLV_SHARED_FOLDER_HOST"] || @properties["SHARED_FOLDER_HOST"] || ""
 @shared_folder_guest = ENV["MLV_SHARED_FOLDER_GUEST"] || @properties["SHARED_FOLDER_GUEST"] || ""
 
+@do_private_key_path = ENV["MLV_DO_PRIVATE_KEY_PATH"] || @properties["DO_PRIVATE_KEY_PATH"] || "./id_rsa"
+@do_token = ENV["MLV_DO_TOKEN"] || @properties["DO_TOKEN"] || ""
+@do_image = ENV["MLV_DO_IMAGE"] || @properties["DO_IMAGE"] || "centos-6-5-x64"
+@do_region = ENV["MLV_DO_REGION"] || @properties["DO_REGION"] || "sgp1"
+@do_size = ENV["MLV_DO_SIZE"] || @properties["DO_SIZE"] || "1gb"
+
 @vm_name = get_vm_name("{i}")
 
 puts "Loading project #{@project_name}.." unless @command == "global-status"
@@ -164,14 +170,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     
     config.vm.provider :digital_ocean do |provider, override|
-        override.ssh.private_key_path = './id_rsa'
         override.vm.box = 'digital_ocean'
         override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+		
+		override.ssh.private_key_path = @do_private_key_path
 
-        provider.token = 'insertHere'
-        provider.image = 'centos-6-5-x64'
-        provider.region = 'sgp1'
-        provider.size = '1gb'
+        provider.token = @do_token
+		
+        provider.image = @do_image
+        provider.region = @do_region
+        provider.size = @do_size
 		
 		override.hostmanager.ip_resolver = proc do |machine|
 			result = ""
