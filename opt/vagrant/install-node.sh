@@ -8,7 +8,7 @@ install_ruby=true
 # Load the normalized project properties.
 source /tmp/$1.project.properties
 
-if [ install_nodejs == true ]; then
+if [ $install_nodejs == "true" ]; then
 
   yum -y install curl epel-release # epel-release necessary to install nodejs/npm on CentOS 5, and no harm otherwise
   curl --silent --location https://rpm.nodesource.com/setup | bash -
@@ -34,7 +34,7 @@ if [ install_nodejs == true ]; then
 
 fi
 
-if [ install_ruby == true ]; then
+if [ $install_ruby == "true" ]; then
   if [ hash ruby 2> /dev/null ]; then
     echo 'Ruby is already installed'
   else

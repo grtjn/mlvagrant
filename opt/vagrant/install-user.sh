@@ -8,7 +8,7 @@ if [ -d /vagrant ]; then
   # Load the normalized project properties.
   source /tmp/$1.project.properties
 
-  if [ install_git_project == true ]; then
+  if [ $install_git_project == "true" ]; then
     # creation of goups and users is limited on demo servers
     /usr/sbin/groupadd -r sshuser
     pass=$(perl -e 'print crypt($ARGV[0], "password")' $1)

@@ -11,20 +11,20 @@ install_mlcp=true
 source /tmp/$1.project.properties
 
 # Zip/unzip not required for MLCP (provided through Java)
-if [ install_zip == true ]; then
+if [ $install_zip == "true" ]; then
   yum -y install zip unzip
 fi
 
-if [ install_mlcp == true ]; then
+if [ $install_mlcp == "true" ]; then
   # Java required for MLCP
   yum -y install java-1.8.0-openjdk-devel
 
   # Determine installer to use.
   if [ -n "${mlcp_installer}" ]; then
     installer=${mlcp_installer} 
-  elif [ "${ml_version}" = "8" ]; then
+  elif [ $ml_version == "8" ]; then
     installer=mlcp-1.3-3-bin.zip
-  elif [ "${ml_version}" = "7" ]; then
+  elif [ $ml_version == "7" ]; then
     installer=mlcp-Hadoop2-1.2-4-bin.zip
   else
     installer=mlcp-Hadoop2-1.0-5-bin.zip
@@ -40,6 +40,6 @@ if [ install_mlcp == true ]; then
     cd /usr/local && ln -s "/opt/$install_dir" mlcp
   fi
 
-elif [ install_java == true ]; then
+elif [ $install_java == "true" ]; then
   yum -y install java-1.8.0-openjdk-devel
 fi

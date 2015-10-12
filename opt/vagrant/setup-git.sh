@@ -8,12 +8,12 @@ install_git_project=true
 # Load the normalized project properties.
 source /tmp/$1.project.properties
 
-if [ install_git == true ]; then
+if [ $install_git == "true" ]; then
   # Install git
   yum -y install git
 fi
 
-if [ install_git_project == true ]; then
+if [ $install_git_project == "true" ]; then
   # create a local git repo
   mkdir -p /space/projects/$1.git
 

@@ -9,7 +9,7 @@ install_tomcat=true
 # Load the normalized project properties.
 source /tmp/$1.project.properties
 
-if [ install_tomcat == true ]; then
+if [ $install_tomcat == "true" ]; then
 
   # tomcat likely pre-installed on demo servers, but run this anyhow
   if [[ $os == *"7."* ]]; then
