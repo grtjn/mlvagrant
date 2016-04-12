@@ -4,9 +4,25 @@
 
 [Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.0...HEAD)
 
+**Implemented enhancements:**
+
+- Add support for ML9 [\#91](https://github.com/grtjn/mlvagrant/issues/91)
+- Upgrade install to ML 8.0-4 [\#88](https://github.com/grtjn/mlvagrant/issues/88)
+- Create/copy Bento CentOS 7.2 box [\#87](https://github.com/grtjn/mlvagrant/issues/87)
+- Add support for unzip [\#81](https://github.com/grtjn/mlvagrant/issues/81)
+
 **Fixed bugs:**
 
 - First time backup-cache fails [\#79](https://github.com/grtjn/mlvagrant/issues/79)
+- Checking if box 'chef/centos-6.5' is up to date: 404 Not Found [\#68](https://github.com/grtjn/mlvagrant/issues/68)
+
+**Closed issues:**
+
+- Question re: license application [\#93](https://github.com/grtjn/mlvagrant/issues/93)
+
+**Merged pull requests:**
+
+- Bump Marklogic version to 8.0.4 [\#94](https://github.com/grtjn/mlvagrant/pull/94) ([vladistan](https://github.com/vladistan))
 
 ## [1.0.0](https://github.com/grtjn/mlvagrant/tree/1.0.0) (2015-09-08)
 **Implemented enhancements:**
@@ -49,7 +65,6 @@
 
 - Yum cache multiplied at backup/restore to/from host [\#75](https://github.com/grtjn/mlvagrant/issues/75)
 - Line-ends in .properties causing trouble on Windows [\#70](https://github.com/grtjn/mlvagrant/issues/70)
-- Checking if box 'chef/centos-6.5' is up to date: 404 Not Found [\#68](https://github.com/grtjn/mlvagrant/issues/68)
 - /vagrant/project.properties: no such file or directory [\#66](https://github.com/grtjn/mlvagrant/issues/66)
 - dependency warnings on provision - cluster not configured [\#65](https://github.com/grtjn/mlvagrant/issues/65)
 - cp: cannot stat `/space/software/yum' [\#64](https://github.com/grtjn/mlvagrant/issues/64)
