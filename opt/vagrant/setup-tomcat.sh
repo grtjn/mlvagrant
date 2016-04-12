@@ -4,7 +4,7 @@ echo "running $0 $@"
 os=`cat /etc/redhat-release`
 
 # Defaults
-install_tomcat=true
+install_tomcat=false
 
 # Load the normalized project properties.
 source /tmp/$1.project.properties

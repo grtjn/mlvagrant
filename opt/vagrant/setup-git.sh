@@ -23,7 +23,7 @@ if [ $install_git_project == "true" ]; then
     git --bare init
   fi
   if [ ! -f hooks/post-receive ]; then
-    printf "#!/bin/sh\nin=\$(cat)\nbranch=\${in##*/}\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f \$branch\nchown -R :sshuser /space/projects/$1.live\nchmod -R g+rw /space/projects/$1.live\n" > hooks/post-receive
+    printf "#!/bin/sh\nin=\$(cat)\nbranch=\${in##*/}\nGIT_WORK_TREE=/space/projects/$1.live git checkout -f \$branch\n" > hooks/post-receive
     chmod 755 hooks/post-receive
   fi
 

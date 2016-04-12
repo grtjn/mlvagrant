@@ -8,7 +8,7 @@ Key features:
 - Works on Windows, MacOS, and Linux
 - Uses pre-built CentOS Vagrant base boxes
 - Supports MarkLogic 5 up to 8
-- Supports CentOS 5.11 up to 7.1
+- Supports CentOS 5.11 up to 7.2
 - Automatic setup of cluster
 - Also installs MLCP, Java, NodeJS, Ruby, etc
 - Highly configurable
@@ -36,8 +36,8 @@ You first need to download and install prerequisites and mlvagrant itself:
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
   - `sudo chmod 777 /space/software`
-- Download [MarkLogic 8.0-3 for CentOS](http://developer.marklogic.com/products) (login required)
-- Download [MLCP 1.3-3 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-1.3-3-bin.zip)
+- Download [MarkLogic 8.0-5 for CentOS](http://developer.marklogic.com/products) (login required)
+- Download [MLCP 8.0-5 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-8.0-5-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
 - Download mlvagrant:
   - `git clone https://github.com/grtjn/mlvagrant.git`
@@ -107,7 +107,7 @@ VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 **IMPORTANT: DON'T CHANGE ONCE YOU HAVE CREATED THE VM'S!!**
 
 ### vm_version
-CentOS base VM version - defaults to 6.7, allowed: 5.11/6.5/6.6/6.7/7.0/7.1
+CentOS base VM version - defaults to 6.7, allowed: 5.11/6.5/6.6/6.7/7.0/7.1/7.2
 
 Note: CentOS 5(.11) does not support MarkLogic 8
 
@@ -149,7 +149,7 @@ Override hard-coded MLCP installers (file is searched in /space/software, or c:\
 ### update_os
 Run full OS updates - defaults to false
 
-Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.7+ resp 7.1+)
+Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.7+ resp 7.2+)
 
 ### install_dev_tools
 Install group "Development tools" - defaults to false
@@ -250,9 +250,9 @@ The bootstrap scripts contain a few safeguards that should allow running it outs
 - Download the relevant ML and MLCP installers from http://developer.marklogic.com to your local machine.
 - Download the mlvagrant file from github (git clone or download the release zip)
 - Upload installers, and scripts to the first server using scp:
-  - scp Downloads/MarkLogic-8.0-3.x86_64.rpm <node1 name/ip>:/space/software/
-  - scp Downloads/mlcp-Hadoop2-1.3-3-bin.zip <node1 name/ip>:/space/software/
-  - scp vagrant/* <node1 name/ip>:/opt/vagrant/
+  - scp Downloads/MarkLogic-8.0-5.x86_64.rpm <node1 name/ip>:/space/software/
+  - scp Downloads/mlcp-8.0-5-bin.zip <node1 name/ip>:/space/software/
+  - scp <mlvagrant project dir>/opt/vagrant/* <node1 name/ip>:/opt/vagrant/
 - On first server create files /opt/vagrant/bootstrap-node1.sh, /opt/vagrant/bootstrap-node2.sh, /opt/vagrant/bootstrap-node3.sh, .. (one for each server)
 - Note: there is a bootstrap-server.sh script that you could take as example.
 - Make them executable: chmod +x /opt/vagrant/*.sh
@@ -274,8 +274,8 @@ echo "running $0 $@"
 
 - Note: myproject can be any name, try to keep it short though
 - From first server 'forward' installers and scripts to all others using scp:
-  - scp /space/software/MarkLogic-8.0-3.x86_64.rpm <nodeN name/ip>:/space/software/
-  - scp /space/software/mlcp-Hadoop2-1.3-3-bin.zip <nodeN name/ip>:/space/software/
+  - scp /space/software/MarkLogic-8.0-5.x86_64.rpm <nodeN name/ip>:/space/software/
+  - scp /space/software/mlcp-8.0-5-bin.zip <nodeN name/ip>:/space/software/
   - scp /opt/vagrant/* <nodeN name/ip>:/opt/vagrant/
 
 Next, initiate MarkLogic bootstrapping on every machine, one by one. This will also by default install MLCP, Java, Git, NodeJS, and other useful tools, and make the MarkLogic instances join together in a cluster:

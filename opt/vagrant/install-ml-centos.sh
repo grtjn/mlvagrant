@@ -7,6 +7,8 @@ ml_version=8
 # Load the normalized project properties.
 source /tmp/$1.project.properties
 
+os=`cat /etc/redhat-release`
+
 # TODO: Apply recommended page settings
 #echo 320 > /proc/sys/vm/nr_hugepages
 #echo "transparent_hugepage=never" >> /etc/grub.conf
@@ -42,9 +44,20 @@ elif [ $ml_version == "5" ]; then
 elif [ $ml_version == "6" ]; then
   installer="MarkLogic-6.0-6.x86_64.rpm"
 elif [ $ml_version == "8" ]; then
-  installer="MarkLogic-8.0-4.2.x86_64.rpm"
+  if [[ $os == *"7."* ]]; then
+    installer="MarkLogic-RHEL7-8.0-5.x86_64.rpm"
+  else
+    installer="MarkLogic-8.0-5.x86_64.rpm"
+  fi
+elif [ $ml_version == "9" ]; then
+  if [[ $os == *"7."* ]]; then
+    installer="MarkLogic-RH7-9.0-20160201.x86_64-EA1.rpm"
+  else
+    # RH6 not supported?
+    installer="MarkLogic-RH7-9.0-20160201.x86_64-EA1.rpm"
+  fi
 else
-  installer="MarkLogic-7.0-5.2.x86_64.rpm"
+  installer="MarkLogic-7.0-6.2.x86_64.rpm"
 fi
 
 # Run MarkLogic installer
