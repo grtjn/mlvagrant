@@ -32,6 +32,8 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Install the [vagrant-hostmanager](https://github.com/smdahlen/vagrant-hostmanager) plugin:
   - `vagrant plugin install vagrant-hostmanager`
+- If a proxy is required to access the external network, install the [vagrant-proxyconf](https://github.com/tmatilai/vagrant-proxyconf) plugin:
+  - `vagrant plugin install vagrant-proxyconf`
 - Create /space/software (**For Windows**: `c:\space\software`):
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
@@ -136,6 +138,14 @@ Note: enabling this makes your VMs accessible from outside, beware of security l
 
 ### priv_net_ip
 Assign dedicated private IP to master node - slaves get same ip + i
+
+### net_proxy
+URL for a network proxy for FTP, HTTP, and HTTPS requests
+
+Use of this setting requires installation of the `vagrant-proxyconf` plugin
+
+### no_proxy
+Hostnames or IP addresses that do not require use of the network proxy
 
 ### shared_folder_host/shared_folder_guest
 Mount an extra folder from host on vm - project dir is automatically shared as /vagrant
