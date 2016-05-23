@@ -90,6 +90,10 @@ end
 @net_proxy = ENV["MLV_NET_PROXY"] || @properties["NET_PROXY"] || ""
 @no_proxy = ENV["MLV_NO_PROXY"] || @properties["NO_PROXY"] || "localhost,127.0.0.1"
 
+unless @net_proxy.empty? or Vagrant.has_plugin?("vagrant-proxyconf")
+  abort 'To use net_proxy setting, run "vagrant plugin install vagrant-proxyconf" first.'
+end
+
 @vm_name = get_vm_name("{i}")
 
 puts "Loading project #{@project_name}.." unless @command == "global-status"
@@ -136,11 +140,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     mastername = get_vm_name(1)
 
-    hostnames = (1..@nr_hosts).map{|i| get_vm_name(i)}.join(",")
-    config.proxy.ftp = @net_proxy
-    config.proxy.http = @net_proxy
-    config.proxy.https = @net_proxy
-    config.proxy.no_proxy = "#{@no_proxy},#{hostnames}"
+    unless @net_proxy.empty?
+      hostnames = (1..@nr_hosts).map{|i| get_vm_name(i)}.join(",")
+      config.proxy.ftp = @net_proxy
+      config.proxy.http = @net_proxy
+      config.proxy.https = @net_proxy
+      config.proxy.no_proxy = "#{@no_proxy},#{hostnames}"
+    end
 
     config.hostmanager.enabled = false
     config.hostmanager.manage_host = true
