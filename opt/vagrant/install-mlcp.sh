@@ -23,9 +23,9 @@ if [ $install_mlcp == "true" ]; then
   if [ -n "${mlcp_installer}" ]; then
     installer=${mlcp_installer} 
   elif [ $ml_version == "8" ]; then
-    installer=mlcp-8.0-4-bin.zip
+    installer=mlcp-8.0-5-bin.zip
   elif [ $ml_version == "9" ]; then
-    installer=mlcp-9.0-bin-20160201-EA1.zip
+    installer=mlcp-9.0-bin-20160510-EA2.zip
   elif [ $ml_version == "7" ]; then
     installer=mlcp-7.0-6-bin.zip
   else
