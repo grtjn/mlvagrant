@@ -1,8 +1,26 @@
 # Change Log
 
-## [Unreleased](https://github.com/grtjn/mlvagrant/tree/HEAD)
+## [1.0.2](https://github.com/grtjn/mlvagrant/tree/1.0.2) (2016-09-09)
+[Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.1...1.0.2)
 
-[Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.0...HEAD)
+**Implemented enhancements:**
+
+- Add pm2 init to bootstrapping [\#97](https://github.com/grtjn/mlvagrant/issues/97)
+- Add support for ML9 EA2 [\#95](https://github.com/grtjn/mlvagrant/issues/95)
+- Add httpd install to bootstrapping [\#92](https://github.com/grtjn/mlvagrant/issues/92)
+- Add comments on Proxying to README [\#82](https://github.com/grtjn/mlvagrant/issues/82)
+- Add support for ssl and ldap cmd [\#76](https://github.com/grtjn/mlvagrant/issues/76)
+
+**Fixed bugs:**
+
+- Setting static IP Address in clustered configuration [\#99](https://github.com/grtjn/mlvagrant/issues/99)
+
+**Merged pull requests:**
+
+- Add network proxy configuration settings [\#96](https://github.com/grtjn/mlvagrant/pull/96) ([jongiddy](https://github.com/jongiddy))
+
+## [1.0.1](https://github.com/grtjn/mlvagrant/tree/1.0.1) (2016-04-12)
+[Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.0...1.0.1)
 
 **Implemented enhancements:**
 
