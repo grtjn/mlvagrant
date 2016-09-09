@@ -21,5 +21,7 @@ sudo /opt/vagrant/install-node.sh $4
 sudo /opt/vagrant/install-mlcp.sh $4
 sudo /opt/vagrant/install-user.sh $4
 sudo /opt/vagrant/setup-git.sh $4
+sudo /opt/vagrant/setup-pm2.sh $4
+sudo /opt/vagrant/setup-httpd.sh $4
 sudo /opt/vagrant/setup-tomcat.sh $4
 sudo /opt/vagrant/backup-yum-cache.sh

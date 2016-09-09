@@ -194,6 +194,19 @@ Install Git command-line tools - defaults to true
 ### install_git_project
 Initializes a bare Git repository under /space/projects, along with a user named {project_name} to use it
 
+### install_pm2
+Install PM2 NodeJs Process Manager, for running NodeJs services - defaults to true
+
+### install_httpd
+Install and enable HTTPD service - defaults to true
+
+Note: HTTPD is mostly already installed on CentOS, this is just to be certain
+
+### install_https
+Install modules and tools for SSL/HTTPS - defaults to true
+
+Note: HTTPD needs to be configured properly to enable HTTPS in there. See [README](#using-https-with-httpd) for details.
+
 ### install_tomcat
 Install Tomcat, and enable the service - defaults to true
 
@@ -302,3 +315,26 @@ Next, initiate MarkLogic bootstrapping on every machine, one by one. This will a
 - Check if you can login with that into the Admin ui, and then consider removing the admin/admin account (not required, but good practice as well)
 
 Congratulations, you should have a working cluster. Now you can start deploying your MarkLogic applications on it!
+
+## Using HTTPS with HTTPD
+
+To be able to use HTTPS in HTTPD, you need mod_ssl and openssl libraries. Both are installed by mlvagrant by default.
+
+Next to that, you will need a properly signed certificate. Your local IT department will likely be able to help with that. Here a general description of the practical steps required: https://wiki.centos.org/HowTos/Https#head-37cd1f5c67d362756f09313cd758bef48407c325 (section 2).
+
+Once there, you can start configuring HTTPD for using HTTPS. You can do that per VirtualHost, as described here: https://wiki.centos.org/HowTos/Https#head-35299da4f7078eeba5f5f62b0222acc8c5f2db5f (section 3), but you can also consider configuring the SSLCert* properties on global level in `/etc/httpd/conf.d/ssl.conf`.
+
+While in there, also consider applying a more strict SSL policy:
+
+```
+SSLCipherSuite ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!TLSv1.0:!SSLv3
+SSLProtocol ALL -SSLv2 -SSLv3
+```
+
+Once you have applied those SSL properties globally, you only need to add `SSLEngine on` to the appropriate VirtualHosts in `/etc/httpd/conf/httpd.conf`.
+
+Restart HTTPD to apply config changes.
+
+## PM2 NodeJS Process Manager
+
+MlVagrant now also includes setting up PM2. It is recommended to create an appropriate pm2 user upfront for running the pm2 service 'globally'. The following installation guide give an impression of how PM2 can be used to both deploy and run project code on a server: https://github.com/marklogic/slush-marklogic-node/blob/master/app/templates/INSTALL.mdown#deploying-to-a-server

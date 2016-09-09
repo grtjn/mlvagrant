@@ -27,7 +27,7 @@ if [ $install_mlcp == "true" ]; then
   elif [ $ml_version == "9" ]; then
     installer=mlcp-9.0-bin-20160510-EA2.zip
   elif [ $ml_version == "7" ]; then
-    installer=mlcp-7.0-6-bin.zip
+    installer=mlcp-7.0-6.4-bin.zip
   else
     installer=mlcp-Hadoop2-1.0-6-bin.zip
   fi

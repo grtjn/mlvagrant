@@ -65,8 +65,8 @@ end
 def inc_ip(ip, i)
   newip = "#{ip}"
   nr = "#{ip}"
-  nr.gsub!(/^(.*\.)+/, "").to_i
-  newip.gsub!(/\.\d+$/, ".#{nr + i}")
+  nr.gsub!(/^(.*\.)+/, "")
+  newip.gsub!(/\.\d+$/, ".#{nr.to_i + i}")
   newip
 end
 
