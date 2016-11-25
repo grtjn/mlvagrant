@@ -172,6 +172,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
         vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
+        # to make sure ssh won't timeout because of a regression in VBox
+        vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
         #vb.gui = true # for debugging
     end
 
