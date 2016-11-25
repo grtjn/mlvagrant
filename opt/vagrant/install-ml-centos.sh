@@ -45,16 +45,16 @@ elif [ $ml_version == "6" ]; then
   installer="MarkLogic-6.0-6.x86_64.rpm"
 elif [ $ml_version == "8" ]; then
   if [[ $os == *"7."* ]]; then
-    installer="MarkLogic-RHEL7-8.0-5.8.x86_64.rpm"
+    installer="MarkLogic-RHEL7-8.0-6.x86_64.rpm"
   else
-    installer="MarkLogic-RHEL6-8.0-5.8.x86_64.rpm"
+    installer="MarkLogic-RHEL6-8.0-6.x86_64.rpm"
   fi
 elif [ $ml_version == "9" ]; then
   if [[ $os == *"7."* ]]; then
-    installer="MarkLogic-RHEL7-9.0-20160510.x8664-EA2.rpm"
+    installer="MarkLogic-RHEL7-9.0-20160909.x86_64-EA3.rpm"
   else
     # RH6 not supported?
-    installer="MarkLogic-RHEL7-9.0-20160510.x8664-EA2.rpm"
+    installer="MarkLogic-RHEL7-9.0-20160909.x86_64-EA3.rpm"
   fi
 else
   installer="MarkLogic-7.0-6.4.x86_64.rpm"
