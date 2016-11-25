@@ -37,21 +37,21 @@ You first need to download and install prerequisites and mlvagrant itself:
   - `vagrant plugin install vagrant-proxyconf`
 - To optionally verify and fix VBox Guest Additions, install the [vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest) plugin:
   - `vagrant plugin install vagrant-vbguest`
-- Create /space/software (**For Windows**: `c:\space\software`):
+- Create `/space/software` (**For Windows**: `c:\space\software`):
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
   - `sudo chmod 777 /space/software`
 - Download [MarkLogic 8.0-6 for CentOS](http://developer.marklogic.com/products) (login required)
 - Download [MLCP 8.0-6 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-8.0.6-bin.zip)
-- Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
+- Move MarkLogic rpm, and MLCP zip to `/space/software` (no need to unzip MLCP!)
 - Download mlvagrant:
   - `git clone https://github.com/grtjn/mlvagrant.git`
   - or pull down one of its release zips
-- Create /opt/vagrant (**For Windows**: `c:\opt\vagrant`), if it doesn't exist yet:
+- Create `/opt/vagrant` (**For Windows**: `c:\opt\vagrant`), if it doesn't exist yet:
   - `sudo mkdir -p /opt/vagrant`
 - Make sure Vagrant has read/exec access to that dir:
   - `sudo chmod 755 /opt/vagrant`
-- Copy mlvagrant/opt/vagrant to /opt/vagrant
+- Copy `mlvagrant/opt/vagrant/*` to `/opt/vagrant/`
 
 **IMPORTANT:**
 
@@ -60,8 +60,8 @@ You will also need to get hold of a valid license key. Put the license key info 
 Above steps need to taken only once. For every project you wish to create VMs, you simply take these steps:
 
 - Create a new project folder (anywhere you like) with a short name without spaces ('vgtest' for instance)
-- Copy mlvagrant/project/Vagrantfile to that folder
-- Copy mlvagrant/project/project.properties to that folder
+- Copy `mlvagrant/project/Vagrantfile` to that folder
+- Copy `mlvagrant/project/project.properties` to that folder
 - Open a Terminal or command-line in that folder, and run:
   - `vagrant up --no-provision` (may take a while depending on bandwidth, particularly first time)
   - `vagrant provision` (may take a while, enter sudo password when asked, to allow changing /etc/hosts)
@@ -225,7 +225,7 @@ Note: on CentOS 5 you get Tomcat 5 (tomcat5), on CentOS 6 you get Tomcat 6 (tomc
 
 The earlier version of mlvagrant was using public_network, and that will likely reappear as option soon. Handing out of IPs in that case depends on the external DHCP of the network you happen to be connected with. If you are running on a laptop, and take it elsewhere, your laptop, and public_network VMs will get new IPs. At that moment the hosts tables become outdated. You can fix that with a simple command though:
 
-- vagrant hostmanager
+- `vagrant hostmanager`
 
 That will go over all VMs, get its current IPs, and update the hosts tables on host and all VMs.
 
@@ -235,19 +235,19 @@ Scaling up or down is not too big an issue, just make sure you follow below step
 
 To scale up:
 
-- vi project.properties, increase nr_hosts
-- vagrant status, make note of names of not-created VMs
-- vagrant up --no-provision {names of 'not-created' VMs}
-- vagrant host-manager (will run across all VMs and host to update hosts tables with new VMs)
-- vagrant provision {names of 'not-created' VMs}
+- `vi project.properties`, increase `nr_hosts`
+- `vagrant status`, make note of names of not-created VMs
+- `vagrant up --no-provision {names of 'not-created' VMs}` (no need to provision the other ones again)
+- `vagrant hostmanager` (will run across all VMs and host to update hosts tables with new VMs)
+- `vagrant provision {names of 'not-created' VMs}`
 
 To scale down:
 
-- vagrant status, make note of last VM name
-- go to Admin UI on last vm (http://lastvmname:8001/)
+- `vagrant status`, make note of last VM name
+- go to Admin UI on last vm (`http://lastvmname:8001/`)
 - click on host details of that host, select Leave (you will need to move data, and remove all forests from that host first)
-- vagrant destroy {lastvmname}
-- vi project.properties, decrease nr_hosts setting
+- `vagrant destroy {lastvmname}`
+- `vi project.properties`, decrease `nr_hosts` setting
 
 Note: you can scale down multiple hosts, but make sure to remove VMs from last to first. VM names are calculated by incrementing from 1 to nr_hosts. So, better not to leave gaps.
 
@@ -274,19 +274,19 @@ The name of the user is derived from the folder name. The password is initialize
 The bootstrap scripts contain a few safeguards that should allow running it outside (ML)Vagrant as well. I have used them on a fair number of internal demo-servers with success, also to create fully operational clusters in just a few steps. The procedure is a little different, but will save you a lot of manual typing:
 
 -	Open an SSH connection to each server, create the folders for installers and scripts, and change ownership to yourself:
-  - sudo mkdir -p /space/software
-  - sudo mkdir -p /opt/vagrant
-  - sudo chown $USER:sshuser /space/software
-  - sudo chown $USER:sshuser /opt/vagrant
+  - `sudo mkdir -p /space/software`
+  - `sudo mkdir -p /opt/vagrant`
+  - `sudo chown $USER:sshuser /space/software`
+  - `sudo chown $USER:sshuser /opt/vagrant`
 - Download the relevant ML and MLCP installers from http://developer.marklogic.com to your local machine.
 - Download the mlvagrant file from github (git clone or download the release zip)
 - Upload installers, and scripts to the first server using scp:
-  - scp Downloads/MarkLogic-8.0-5.x86_64.rpm <node1 name/ip>:/space/software/
-  - scp Downloads/mlcp-8.0-5-bin.zip <node1 name/ip>:/space/software/
-  - scp <mlvagrant project dir>/opt/vagrant/* <node1 name/ip>:/opt/vagrant/
+  - `scp Downloads/MarkLogic-8.0-5.x86_64.rpm <node1 name/ip>:/space/software/`
+  - `scp Downloads/mlcp-8.0-5-bin.zip <node1 name/ip>:/space/software/`
+  - `scp <mlvagrant project dir>/opt/vagrant/* <node1 name/ip>:/opt/vagrant/`
 - On first server create files /opt/vagrant/bootstrap-node1.sh, /opt/vagrant/bootstrap-node2.sh, /opt/vagrant/bootstrap-node3.sh, .. (one for each server)
-- Note: there is a bootstrap-server.sh script that you could take as example.
-- Make them executable: chmod +x /opt/vagrant/*.sh
+- Note: there is a `bootstrap-server.sh` script that you could take as example.
+- Make them executable: `chmod +x /opt/vagrant/*.sh`
 - The first should contain:
 
 ```bash
@@ -305,18 +305,18 @@ echo "running $0 $@"
 
 - Note: myproject can be any name, try to keep it short though
 - From first server 'forward' installers and scripts to all others using scp:
-  - scp /space/software/MarkLogic-8.0-6.x86_64.rpm <nodeN name/ip>:/space/software/
-  - scp /space/software/mlcp-8.0.6-bin.zip <nodeN name/ip>:/space/software/
-  - scp /opt/vagrant/* <nodeN name/ip>:/opt/vagrant/
+  - `scp /space/software/MarkLogic-8.0-6.x86_64.rpm <nodeN name/ip>:/space/software/`
+  - `scp /space/software/mlcp-8.0.6-bin.zip <nodeN name/ip>:/space/software/`
+  - `scp /opt/vagrant/* <nodeN name/ip>:/opt/vagrant/`
 
 Next, initiate MarkLogic bootstrapping on every machine, one by one. This will also by default install MLCP, Java, Git, NodeJS, and other useful tools, and make the MarkLogic instances join together in a cluster:
 
 - On the first server:
-  - cd /opt/vagrant/
-  - ./bootstrap-node1.sh
+  - `cd /opt/vagrant/`
+  - `./bootstrap-node1.sh`
   - wait till it finished (may take several minutes, this part requires internet access)
   - Note: a few steps might throw warnings or errors, but as long as next step succeeds, continue
-  - Open http://<node1 name/ip>:8001/ (MarkLogic Admin UI)
+  - Open `http://<node1 name/ip>:8001/` (MarkLogic Admin UI)
   - Verify if host name of first node is correct, meaning that other hosts must be able to find this host using whatever is specified as host name (can be IP, just a name, or a full DNS name). If necessary add names to /etc/hosts on each server to make them find each other. That is essential for setting up the cluster.
 - Repeat for subsequent nodes, with the appropriate bootstrap script. You should see a new host appear in the MarkLogic Admin UI each time, check host name of each newly added host as you go.
 - Finally, as a good practice: create a personalized admin account (user with your name, and admin role), and preferably a second one for someone else.
@@ -347,6 +347,10 @@ Restart HTTPD to apply config changes.
 
 MlVagrant now also includes setting up PM2. It is recommended to create an appropriate pm2 user upfront for running the pm2 service 'globally'. The following installation guide give an impression of how PM2 can be used to both deploy and run project code on a server: https://github.com/marklogic/slush-marklogic-node/blob/master/app/templates/INSTALL.mdown#deploying-to-a-server
 
+## Fixing issues with Basebox downloads
+
+It has once been reported that the download of a basebox got interrupted, and subsequent attempts were failing. You can go round this manually by deleting the temporary download file that is mentioned in the error messages. You might also be able to work around this with the `vagrant box`. `vagrant box list` will show which boxes are present, you can then try to `remove` the one that causes trouble, or perhaps use `update` in an attempt to get it fixed.
+
 ## Fixing issues with Guest Additions
 
 If you install the vagrant-vbguest plugin, you will get notifications like these below if it notices a mismatch between your local installation of VirtualBox, and the Guest Additions on the vm:
@@ -367,3 +371,58 @@ If you install the vagrant-vbguest plugin, you will get notifications like these
 Usually as long as the Guest Additions version is higher than that of your VirtualBox, you should be good. If it is behind just a little, like GA version 5.1.6 versus VBox Version 5.1.8, you are probably good too. We noticed issues though with older baseboxes that have GA version 5.0.2 in combination with VBox version 5.1.x. You can use the vagrant-vbguest plugin to install the correct Guest Additions if necessary. You can find documentation for its command-line usage here:
 
 https://github.com/dotless-de/vagrant-vbguest#running-as-a-command
+
+## Changing cpu or memory
+
+Pretty simple:
+
+- `vagrant halt`
+- `vi project.properties`, change `master_memory`, `master_cpus` according to needs, and also `slave_memory`, and `slave_cpus` if you have more than one node in your local cluster
+- `vagrant up`
+- Verify if the Cluster status looks good in the Admin UI, particularly if you decrease memory
+
+Done!
+
+## Extending disk space beyond the default 40Gb
+
+Backup the virtual box vm to be sure, or at least any data on it that needs to be preserved no matter what.
+
+- Stop the vm with: `vagrant halt`
+- Open VirtualBox UI:
+  - Select the vm at hand
+  - Open the `Settings`
+  - Open the `Storage` section
+  - Select the controller that also holds the existing disk
+  - Add a new `Hard Disk` (to the same controller)
+  - Select to create a new empty file (on the host) to hold the data
+  - Select `VMDK` type (Virtual Machine DisK)
+  - Select `Dynamically Allocated` (to make the host file strech according to usage)
+  - Enter `box-disk2` as name, and select 40Gb as size (or something else according to available space and needs)
+  - Confirm creation, and close the `Settings` dialog
+  - You can close VirtualBox UI now
+- Start the vm with: `vagrant up`
+- SSH into the vm with: `vagrant ssh`
+  - Start with stopping MarkLogic service: `sudo service MarkLogic stop`
+  - `sudo fdisk -l` will reveal a new /dev/sdb, but the space is still unallocated
+  - `sudo fdisk /dev/sdb` to start allocating the space
+    - `n` to add a new partition to that disk
+    - `p` for primary partition
+    - `1` to add the first primary partition
+    - Hit `<enter>` twice to include all available sectors into the partition
+    - `t` to change the partitions system id
+    - `8e` to pick Linux LVM
+    - And finally `w` to write the changes and exit fdisk
+  - `sudo fdisk -l` will reveal both /dev/sdb, and the /dev/sdb1 partition now
+  - Verify the filesystem type of the existing /dev/sda1 with: `sudo df -T`, it should be `xfs` (or maybe `ext4` for older or centos6 baseboxes)
+  - Apply the same filesystem type to /dev/sdb1 with: `sudo mkfs.xfs /dev/sdb1` (or `sudo mkfs.ext4 /dev/sdb1` for the ext4 type)
+  - Create the physical volume with: `sudo pvcreate /dev/sdb1` (confirm to ignore the warning)
+  - Check the existing volume groups with: `sudo vgs`, it should report `centos` (or maybe `VolGroup` in older baseboxes)
+  - Append the /dev/sdb1 partition to that group: `sudo vgextend centos /dev/sdb1` (or `sudo vgextend VolGroup /dev/sdb1`)
+  - Check the existing logical volumes with: `sudo lvs`, it should report `root` and `swap`, both connected to the `centos` volume group (`lv_root` and `lv_swap` in older baseboxes)
+  - Append all free space of /dev/sdb1 to the `root` volume with: `sudo lvextend -l +100%FREE /dev/centos/root` (or `sudo lvextend -l +100%FREE /dev/VolGroup/lv_root`)
+  - Finally, resize the filesystem of root: `sudo xfs_growfs /dev/centos/root` (or for ext4: `sudo resize2fs /dev/VolGroup/lv_root`)
+  - You can verify changes with `sudo vgs`, `sudo lvs`, and `sudo df -h`
+  - Start up MarkLogic again with: `sudo service MarkLogic start`
+  - You can close the SSH with `exit`
+
+Done!
