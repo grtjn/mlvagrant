@@ -1,5 +1,27 @@
 # Change Log
 
+## [1.0.3](https://github.com/grtjn/mlvagrant/tree/1.0.3) (2016-11-25)
+[Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.2...1.0.3)
+
+**Implemented enhancements:**
+
+- Upgrade to latest ML installers.. [\#102](https://github.com/grtjn/mlvagrant/issues/102)
+
+**Fixed bugs:**
+
+- hostmanager fails on centos-7.2 basebox [\#105](https://github.com/grtjn/mlvagrant/issues/105)
+- Automate install of GuestAdditions [\#104](https://github.com/grtjn/mlvagrant/issues/104)
+- Vagrant provision failing on VirtualBox 5.1.6 [\#103](https://github.com/grtjn/mlvagrant/issues/103)
+- Issues mounting folders with VBox 5.1 [\#101](https://github.com/grtjn/mlvagrant/issues/101)
+- Centos 7.1/7.2 vm issues [\#98](https://github.com/grtjn/mlvagrant/issues/98)
+
+**Closed issues:**
+
+- Increasing disk space beyond the Bento basebox default of 40Gb [\#90](https://github.com/grtjn/mlvagrant/issues/90)
+- Check out Vagrant 1.8 and Otto project [\#86](https://github.com/grtjn/mlvagrant/issues/86)
+- File download aborts, vagrant up cannot continue [\#84](https://github.com/grtjn/mlvagrant/issues/84)
+- Document how to change mem/cpu [\#83](https://github.com/grtjn/mlvagrant/issues/83)
+
 ## [1.0.2](https://github.com/grtjn/mlvagrant/tree/1.0.2) (2016-09-09)
 [Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.1...1.0.2)
 
