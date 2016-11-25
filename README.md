@@ -47,10 +47,10 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Download mlvagrant:
   - `git clone https://github.com/grtjn/mlvagrant.git`
   - or pull down one of its release zips
-- Create /opt/vagrant (**For Windows**: `c:\opt\vagrant`):
+- Create /opt/vagrant (**For Windows**: `c:\opt\vagrant`), if it doesn't exist yet:
   - `sudo mkdir -p /opt/vagrant`
-- Make sure Vagrant has write access
-  - `sudo chmod 777 /opt/vagrant`
+- Make sure Vagrant has read/exec access to that dir:
+  - `sudo chmod 755 /opt/vagrant`
 - Copy mlvagrant/opt/vagrant to /opt/vagrant
 
 **IMPORTANT:**
