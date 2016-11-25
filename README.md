@@ -7,7 +7,7 @@ Key features:
 - Easy creation of VirtualBox VMs
 - Works on Windows, MacOS, and Linux
 - Uses pre-built CentOS Vagrant base boxes
-- Supports MarkLogic 5 up to 8
+- Supports MarkLogic 5 up to 9
 - Supports CentOS 5.11 up to 7.2
 - Automatic setup of cluster
 - Also installs MLCP, Java, NodeJS, Ruby, etc
@@ -29,17 +29,20 @@ Note: this project used to depend on chef/centos boxes, but they are no longer a
 You first need to download and install prerequisites and mlvagrant itself:
 
 - Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+  - When using VirtualBox 5.1, make sure to use latest baseboxes, e.g. those for CentOS 6.8 and 7.2
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Install the [vagrant-hostmanager](https://github.com/smdahlen/vagrant-hostmanager) plugin:
   - `vagrant plugin install vagrant-hostmanager`
 - If a proxy is required to access the external network, install the [vagrant-proxyconf](https://github.com/tmatilai/vagrant-proxyconf) plugin:
   - `vagrant plugin install vagrant-proxyconf`
+- To optionally verify and fix VBox Guest Additions, install the [vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest) plugin:
+  - `vagrant plugin install vagrant-vbguest`
 - Create /space/software (**For Windows**: `c:\space\software`):
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
   - `sudo chmod 777 /space/software`
-- Download [MarkLogic 8.0-5 for CentOS](http://developer.marklogic.com/products) (login required)
-- Download [MLCP 8.0-5 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-8.0-5-bin.zip)
+- Download [MarkLogic 8.0-6 for CentOS](http://developer.marklogic.com/products) (login required)
+- Download [MLCP 8.0-6 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-8.0.6-bin.zip)
 - Move MarkLogic rpm, and MLCP zip to /space/software (no need to unzip MLCP!)
 - Download mlvagrant:
   - `git clone https://github.com/grtjn/mlvagrant.git`
@@ -109,12 +112,13 @@ VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 **IMPORTANT: DON'T CHANGE ONCE YOU HAVE CREATED THE VM'S!!**
 
 ### vm_version
-CentOS base VM version - defaults to 6.7, allowed: 5.11/6.5/6.6/6.7/7.0/7.1/7.2
+CentOS base VM version - defaults to 6.7, allowed: 5.11/6.5/6.6/6.7/6.8/7.0/7.1/7.2
 
 Note: CentOS 5(.11) does not support MarkLogic 8
+Note: MarkLogic 9 requires CentOS 7
 
 ### ml_version
-Major MarkLogic release to install - defaults to 8, allowed: 5,6,7,8 (installers need to be present)
+Major MarkLogic release to install - defaults to 8, allowed: 5,6,7,8,9 (installers need to be present)
 
 ### nr_hosts
 Number of hosts in the cluster - defaults to 3, minimum for failover support
@@ -122,11 +126,15 @@ Number of hosts in the cluster - defaults to 3, minimum for failover support
 ### master_memory
 Memory assigned to master node in cluster (first vm) - defaults to 2048
 
+Note: MarkLogic 9 EA3 requires at least 4Gb of memory.
+
 ### master_cpus
 Number of cpus assigned to master node in cluster (first vm) - defaults to 2
 
 ### slave_memory
 Memory assigned to each slave node in cluster - defaults to same as master_memory
+
+Note: MarkLogic 9 EA3 requires at least 4Gb of memory.
 
 ### slave_cpus
 Number of cpus assigned to each slave node in cluster - defaults to same as master_cpus
@@ -297,8 +305,8 @@ echo "running $0 $@"
 
 - Note: myproject can be any name, try to keep it short though
 - From first server 'forward' installers and scripts to all others using scp:
-  - scp /space/software/MarkLogic-8.0-5.x86_64.rpm <nodeN name/ip>:/space/software/
-  - scp /space/software/mlcp-8.0-5-bin.zip <nodeN name/ip>:/space/software/
+  - scp /space/software/MarkLogic-8.0-6.x86_64.rpm <nodeN name/ip>:/space/software/
+  - scp /space/software/mlcp-8.0.6-bin.zip <nodeN name/ip>:/space/software/
   - scp /opt/vagrant/* <nodeN name/ip>:/opt/vagrant/
 
 Next, initiate MarkLogic bootstrapping on every machine, one by one. This will also by default install MLCP, Java, Git, NodeJS, and other useful tools, and make the MarkLogic instances join together in a cluster:
@@ -338,3 +346,24 @@ Restart HTTPD to apply config changes.
 ## PM2 NodeJS Process Manager
 
 MlVagrant now also includes setting up PM2. It is recommended to create an appropriate pm2 user upfront for running the pm2 service 'globally'. The following installation guide give an impression of how PM2 can be used to both deploy and run project code on a server: https://github.com/marklogic/slush-marklogic-node/blob/master/app/templates/INSTALL.mdown#deploying-to-a-server
+
+## Fixing issues with Guest Additions
+
+If you install the vagrant-vbguest plugin, you will get notifications like these below if it notices a mismatch between your local installation of VirtualBox, and the Guest Additions on the vm:
+
+```
+==> ml9-ml1: Checking for guest additions in VM...
+    ml9-ml1: The guest additions on this VM do not match the installed version of
+    ml9-ml1: VirtualBox! In most cases this is fine, but in rare cases it can
+    ml9-ml1: prevent things such as shared folders from working properly. If you see
+    ml9-ml1: shared folder errors, please make sure the guest additions within the
+    ml9-ml1: virtual machine match the version of VirtualBox you have installed on
+    ml9-ml1: your host and reload your VM.
+    ml9-ml1: 
+    ml9-ml1: Guest Additions Version: 5.1.6
+    ml9-ml1: VirtualBox Version: 4.3
+```
+
+Usually as long as the Guest Additions version is higher than that of your VirtualBox, you should be good. If it is behind just a little, like GA version 5.1.6 versus VBox Version 5.1.8, you are probably good too. We noticed issues though with older baseboxes that have GA version 5.0.2 in combination with VBox version 5.1.x. You can use the vagrant-vbguest plugin to install the correct Guest Additions if necessary. You can find documentation for its command-line usage here:
+
+https://github.com/dotless-de/vagrant-vbguest#running-as-a-command
