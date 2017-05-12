@@ -1,5 +1,17 @@
 # Change Log
 
+## [1.0.4](https://github.com/grtjn/mlvagrant/tree/1.0.4) (2017-05-12)
+[Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.3...1.0.4)
+
+**Fixed bugs:**
+
+- Update Vagrantfile to stop vagrant-vbguest from auto-installing guestadditions [\#111](https://github.com/grtjn/mlvagrant/issues/111)
+- Vagrant still not working optimal with vbox 5.1? [\#106](https://github.com/grtjn/mlvagrant/issues/106)
+
+**Merged pull requests:**
+
+- Git should ignore software .vagrant directories [\#109](https://github.com/grtjn/mlvagrant/pull/109) ([vladistan](https://github.com/vladistan))
+
 ## [1.0.3](https://github.com/grtjn/mlvagrant/tree/1.0.3) (2016-11-25)
 [Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.2...1.0.3)
 
@@ -10,7 +22,6 @@
 **Fixed bugs:**
 
 - hostmanager fails on centos-7.2 basebox [\#105](https://github.com/grtjn/mlvagrant/issues/105)
-- Automate install of GuestAdditions [\#104](https://github.com/grtjn/mlvagrant/issues/104)
 - Vagrant provision failing on VirtualBox 5.1.6 [\#103](https://github.com/grtjn/mlvagrant/issues/103)
 - Issues mounting folders with VBox 5.1 [\#101](https://github.com/grtjn/mlvagrant/issues/101)
 - Centos 7.1/7.2 vm issues [\#98](https://github.com/grtjn/mlvagrant/issues/98)
@@ -55,10 +66,6 @@
 
 - First time backup-cache fails [\#79](https://github.com/grtjn/mlvagrant/issues/79)
 - Checking if box 'chef/centos-6.5' is up to date: 404 Not Found [\#68](https://github.com/grtjn/mlvagrant/issues/68)
-
-**Closed issues:**
-
-- Question re: license application [\#93](https://github.com/grtjn/mlvagrant/issues/93)
 
 **Merged pull requests:**
 
