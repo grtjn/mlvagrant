@@ -16,7 +16,7 @@ Key features:
 
 ## Description
 
-By default these scripts create 3 'grtjn/centos-6.7' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
+By default these scripts create 3 'grtjn/centos-7.2' Vagrant VMs, running in VirtualBox. The names and ips will be recorded in /etc/hosts of host and VMs with use of vagrant-hostmanager. MarkLogic (including dependencies) will be installed on all three vms, and bootstrapped to form a cluster. The OS will be fully updated initially, and "Development Tools" installed as well. Zip/Unzip, Java, MLCP, Nodejs, Bower, Gulp, Forever, Ruby, Git, and Tomcat will be installed, and configured. A bare git repository will be prepared in /space/projects. All automatically with just a few commands.
 
 Each VM takes roughly 2.5Gb. The VM template, together with 3 VMs will take about 10Gb of disk space. In addition, each VM that is launched will claim 2Gb of RAM, and 2 CPU cores. Make sure you have sufficient resources!
 
@@ -36,13 +36,13 @@ You first need to download and install prerequisites and mlvagrant itself:
 - If a proxy is required to access the external network, install the [vagrant-proxyconf](https://github.com/tmatilai/vagrant-proxyconf) plugin:
   - `vagrant plugin install vagrant-proxyconf`
 - To optionally verify and fix VBox Guest Additions, install the [vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest) plugin:
-  - `vagrant plugin install vagrant-vbguest`
+  - `vagrant plugin install vagrant-vbguest` (Make sure your Vagrantfile has `config.vbguest.no_install = true`)
 - Create `/space/software` (**For Windows**: `c:\space\software`):
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
   - `sudo chmod 777 /space/software`
-- Download [MarkLogic 8.0-6 for CentOS](http://developer.marklogic.com/products) (login required)
-- Download [MLCP 8.0-6 binaries](http://developer.marklogic.com/download/binaries/mlcp/mlcp-8.0.6-bin.zip)
+- Download [MarkLogic 9 for CentOS](http://developer.marklogic.com/products) (login required)
+- Download [MLCP 9 binaries](http://developer.marklogic.com/products/mlcp)
 - Move MarkLogic rpm, and MLCP zip to `/space/software` (no need to unzip MLCP!)
 - Download mlvagrant:
   - `git clone https://github.com/grtjn/mlvagrant.git`
@@ -93,7 +93,7 @@ To destroy all VMs (maybe to recreate them from scratch):
 The `project.properties` file contains various settings, amongst others:
 
 - `nr_hosts`, defaults to 3
-- `ml_version`, defaults to '8'
+- `ml_version`, defaults to '9'
 
 The minimum number of hosts is 1, the maximum is limited mostly by the local resources you have available. Each vm will take 2.5Gb of disk space, and by default (also in the Vagrantfile) takes 2Gb of ram, and 2 CPU cores.
 
@@ -112,13 +112,13 @@ VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 **IMPORTANT: DON'T CHANGE ONCE YOU HAVE CREATED THE VM'S!!**
 
 ### vm_version
-CentOS base VM version - defaults to 6.7, allowed: 5.11/6.5/6.6/6.7/6.8/7.0/7.1/7.2
+CentOS base VM version - defaults to 7.2, allowed: 5.11/6.5/6.6/6.7/6.8/7.0/7.1/7.2
 
-Note: CentOS 5(.11) does not support MarkLogic 8
-Note: MarkLogic 9 requires CentOS 7
+Note: MarkLogic 8+ does not support CentOS 5-
+Note: MarkLogic 9+ does not support CentOS 6-
 
 ### ml_version
-Major MarkLogic release to install - defaults to 8, allowed: 5,6,7,8,9 (installers need to be present)
+Major MarkLogic release to install - defaults to 9, allowed: 5,6,7,8,9 (installers need to be present)
 
 ### nr_hosts
 Number of hosts in the cluster - defaults to 3, minimum for failover support
@@ -167,7 +167,7 @@ Override hard-coded MLCP installers (file is searched in /space/software, or c:\
 ### update_os
 Run full OS updates - defaults to false
 
-Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.7+ resp 7.2+)
+Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.8+ resp 7.2+)
 
 ### install_dev_tools
 Install group "Development tools" - defaults to false

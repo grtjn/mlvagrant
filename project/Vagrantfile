@@ -74,8 +74,8 @@ end
 @project_name = ENV["MLV_PROJECT_NAME"] || @properties["PROJECT_NAME"] || File.basename(Dir.getwd)
 
 @vm_name = ENV["MLV_VM_NAME"] || @properties["VM_NAME"] || "{project_name}-ml{i}"
-@vm_version = ENV["MLV_VM_VERSION"] || @properties["VM_VERSION"] || "6.7"
-@ml_version = ENV["MLV_ML_VERSION"] || @properties["ML_VERSION"] || "8"
+@vm_version = ENV["MLV_VM_VERSION"] || @properties["VM_VERSION"] || "7.2"
+@ml_version = ENV["MLV_ML_VERSION"] || @properties["ML_VERSION"] || "9"
 @nr_hosts = (ENV["MLV_NR_HOSTS"] || @properties["NR_HOSTS"] || "3").to_i
 @master_memory = (ENV["MLV_MASTER_MEMORY"] || @properties["MASTER_MEMORY"] || "2048").to_i
 @master_cpus = (ENV["MLV_MASTER_CPUS"] || @properties["MASTER_CPUS"] || "2").to_i
@@ -148,6 +148,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       config.proxy.no_proxy = "#{@no_proxy},#{hostnames}"
     end
 
+    if Vagrant.has_plugin?("vagrant-vbguest")
+        config.vbguest.no_install = true
+    end
+
     config.hostmanager.enabled = false
     config.hostmanager.manage_host = true
     config.hostmanager.include_offline = true
@@ -174,6 +178,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
         # to make sure ssh won't timeout because of a regression in VBox
         vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
+        vb.customize ["modifyvm", :id, "--cableconnected2", "on"]
         #vb.gui = true # for debugging
     end
 
