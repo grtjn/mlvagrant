@@ -90,13 +90,109 @@ end
 @net_proxy = ENV["MLV_NET_PROXY"] || @properties["NET_PROXY"] || ""
 @no_proxy = ENV["MLV_NO_PROXY"] || @properties["NO_PROXY"] || "localhost,127.0.0.1"
 
+@remove_ml = !(ENV["MLV_REMOVE_ML"] || "").empty?
+
 unless @net_proxy.empty? or Vagrant.has_plugin?("vagrant-proxyconf")
   abort 'To use net_proxy setting, run "vagrant plugin install vagrant-proxyconf" first.'
 end
 
 @vm_name = get_vm_name("{i}")
 
+if @command == "reload"
+  if @remove_ml
+    print "This will flush the existing MarkLogic installation, and reinstall from scratch. Proceed? [Y|n] "
+  else
+    print "This will upgrade the MarkLogic installation. Proceed? [Y|n] "
+  end
+  response = STDIN.gets.chomp
+  if response == "n"
+    abort "Bailing out. You can use `vagrant halt; vagrant up` instead.."
+  end
+end
+
 puts "Loading project #{@project_name}.." unless @command == "global-status"
+
+# check ml installer
+if (@command == "provision" and @ml_installer == "") or (@command == "reload")
+  os = ""
+  os = "-RH*#{@vm_version[0]}" if @ml_version == "8"
+
+  files = Dir.glob("/space/software/MarkLogic*#{os}-#{@ml_version}.0-*.rpm")
+
+  if files.length > 1
+    i = 1
+    current = nil
+    puts "Please select an installer (hit enter for current):"
+    files.each do |file|
+      print "#{i}. #{file}"
+      if @ml_installer == File.basename(file)
+        print " (current)"
+        current = i
+      end
+      puts ""
+      i = i + 1
+    end
+    response = STDIN.gets.chomp
+    if !response.empty? or current.nil?
+      response = 1 if response.nil?
+      response = [response.to_i, 1].max
+      response = [response, files.length].min
+      @ml_installer = File.basename files[response - 1]
+    end
+  elsif files.length == 1
+    @ml_installer = File.basename files[0]
+  else
+    abort "No suitable MarkLogic installers found in /space/software/!"
+  end
+
+  properties_file = File.read("project.properties")
+  properties_file.gsub!(/[#]?ml_installer=[^\n\r]+/, "ml_installer=#{@ml_installer}")
+  File.write("project.properties", properties_file)
+  puts "Persisted ml_installer=#{@ml_installer} in project.properties.."
+  puts ""
+end
+
+# check mlcp installer
+if (@command == "provision" and @mlcp_installer == "") or (@command == "reload")
+
+  version = "-#{@ml_version}.0"
+  version = "-1.*-" if @ml_version.to_i < 7
+
+  files = Dir.glob("/space/software/mlcp*#{version}*.zip")
+
+  if files.length > 1
+    i = 1
+    current = nil
+    puts "Please select an installer (hit enter for current):"
+    files.each do |file|
+      print "#{i}. #{file}"
+      if @mlcp_installer == File.basename(file)
+        print " (current)" 
+        current = i
+      end
+      puts ""
+      i = i + 1
+    end
+    response = STDIN.gets.chomp
+    if !response.empty? or current.nil?
+      response = 1 if response.nil?
+      response = [response.to_i, 1].max
+      response = [response, files.length].min
+      @mlcp_installer = File.basename files[response - 1]
+    end
+  elsif files.length == 1
+    @mlcp_installer = File.basename files[0]
+  else
+    abort "No suitable MLCP installers found in /space/software/!"
+  end
+
+  properties_file = File.read("project.properties")
+  properties_file.gsub!(/[#]?mlcp_installer=[^\n\r]+/, "mlcp_installer=#{@mlcp_installer}")
+  File.write("project.properties", properties_file)
+  puts "Persisted mlcp_installer=#{@mlcp_installer} in project.properties.."
+  puts ""
+end
+
 if @command == "status" or @command == "up" or @command == "provision"
   puts ""
   puts "vm_name=#{@vm_name}"
@@ -130,9 +226,14 @@ if @command == "status" or @command == "up" or @command == "provision"
   end
   puts ""
   
-  if @command == "up" and @vm_version == "5.11" and @ml_version == "8"
-    puts "MarkLogic 8 NOT supported on CentOS 5! Try MarkLogic 7, or CentOS 6.."
-    abort "Bailing out.."
+  if @command == "up"
+    if @vm_version == "5.11" and (@ml_version == "8" or @ml_version == "9")
+      puts "MarkLogic 8+ NOT supported on CentOS 5-! Try MarkLogic 7-, or CentOS 6+.."
+      abort "Bailing out.."
+    elsif (@vm_version != "7.0" or @vm_version != "7.1" or @vm_version != "7.2") and @ml_version == "9"
+      puts "MarkLogic 9+ NOT supported on CentOS 6-! Try MarkLogic 8-, or CentOS 7+.."
+      abort "Bailing out.."
+    end
   end
 end
 
@@ -204,7 +305,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           master.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
         end
         master.vm.provision :hostmanager
-        master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name]
+        if @command == "reload"
+          master.vm.provision :shell, :path => "/opt/vagrant/reinstall-marklogic-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name, @remove_ml.to_s], :run => "always"
+        else
+          master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name]
+        end
     end
 
     if @nr_hosts > 1
@@ -232,7 +337,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                   slave.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
                 end
                 slave.vm.provision :hostmanager
-                slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name]
+                if @command == "reload"
+                  slave.vm.provision :shell, :path => "/opt/vagrant/reinstall-marklogic-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name, @remove_ml.to_s], :run => "always"
+                else
+                  slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name]
+                end
             end
         end
     end
