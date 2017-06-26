@@ -1,5 +1,20 @@
 # Change Log
 
+## [1.0.5](https://github.com/grtjn/mlvagrant/tree/1.0.5) (2017-06-26)
+[Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.4...1.0.5)
+
+**Implemented enhancements:**
+
+- Setup of pm2 startup script on Centos/RH 7 [\#114](https://github.com/grtjn/mlvagrant/issues/114)
+- Reloading MarkLogic [\#112](https://github.com/grtjn/mlvagrant/issues/112)
+- Upgrading/installing git 2 [\#108](https://github.com/grtjn/mlvagrant/issues/108)
+- Upgrade NodeJS [\#100](https://github.com/grtjn/mlvagrant/issues/100)
+- Dynamically search ML installers [\#53](https://github.com/grtjn/mlvagrant/issues/53)
+
+**Fixed bugs:**
+
+- Cannot use links for resource folders [\#113](https://github.com/grtjn/mlvagrant/issues/113)
+
 ## [1.0.4](https://github.com/grtjn/mlvagrant/tree/1.0.4) (2017-05-12)
 [Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.3...1.0.4)
 
