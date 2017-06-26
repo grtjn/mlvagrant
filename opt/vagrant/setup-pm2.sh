@@ -1,6 +1,8 @@
 #! /bin/sh
 echo "running $0 $@"
 
+os=`cat /etc/redhat-release`
+
 # Defaults
 install_nodejs=true
 install_pm2=true
@@ -10,7 +12,12 @@ source /tmp/$1.project.properties
 
 if [ $install_pm2 == "true" ] && [ $install_nodejs == "true" ]; then
   # PM2 will need git for deployment
-  yum -y install git
+  if [[ $os == *"7."* ]]; then
+    # install git v2 if possible
+    rpm -U http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-1.noarch.rpm && yum -y install git
+  else
+    yum -y install git
+  fi
 
   # Install PM2
   npm install -g pm2
@@ -22,9 +29,15 @@ if [ $install_pm2 == "true" ] && [ $install_nodejs == "true" ]; then
   fi
 
   # Launch PM2 service, if possible
-  if [ id -u pm2 > /dev/null 2>&1 ]; then
+  if [ id -u pm2 > /dev/null 2>&1 ] && [ -d /home/pm2 ]; then
     # Setup PM2 init service scripts
-    pm2 startup centos -u pm2 --hp /home/pm2 --no-daemon
+    if [[ $os == *"7."* ]]; then
+      # use systemd on CentOS 7
+      pm2 startup systemd -u pm2 --hp /home/pm2 --no-daemon
+    else
+      # use service scripts on CentOS 6-
+      pm2 startup centos -u pm2 --hp /home/pm2 --no-daemon
+    fi
     /sbin/service pm2-init.sh start
   else
     echo "WARN: pm2 user doesn't exist yet, could not init nor launch PM2 service!"
