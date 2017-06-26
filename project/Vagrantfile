@@ -227,10 +227,10 @@ if @command == "status" or @command == "up" or @command == "provision"
   puts ""
   
   if @command == "up"
-    if @vm_version == "5.11" and (@ml_version == "8" or @ml_version == "9")
+    if @vm_version =~ /^5\./ and (@ml_version.to_i >= 8)
       puts "MarkLogic 8+ NOT supported on CentOS 5-! Try MarkLogic 7-, or CentOS 6+.."
       abort "Bailing out.."
-    elsif (@vm_version != "7.0" or @vm_version != "7.1" or @vm_version != "7.2") and @ml_version == "9"
+    elsif (@vm_version =~ /^5\./ or @vm_version =~ /^6\./) and @ml_version.to_i >= 9
       puts "MarkLogic 9+ NOT supported on CentOS 6-! Try MarkLogic 8-, or CentOS 7+.."
       abort "Bailing out.."
     end
