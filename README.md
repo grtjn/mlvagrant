@@ -36,7 +36,7 @@ You first need to download and install prerequisites and mlvagrant itself:
 - If a proxy is required to access the external network, install the [vagrant-proxyconf](https://github.com/tmatilai/vagrant-proxyconf) plugin:
   - `vagrant plugin install vagrant-proxyconf`
 - To optionally verify and fix VBox Guest Additions, install the [vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest) plugin:
-  - `vagrant plugin install vagrant-vbguest` (Make sure your Vagrantfile has `config.vbguest.no_install = true`)
+  - `vagrant plugin install vagrant-vbguest` (Make sure your Vagrantfile has `config.vbguest.no_install = true`!)
 - Create `/space/software` (**For Windows**: `c:\space\software`):
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
@@ -66,7 +66,7 @@ Above steps need to taken only once. For every project you wish to create VMs, y
   - `vagrant up --no-provision` (may take a while depending on bandwidth, particularly first time)
   - `vagrant provision` (may take a while, enter sudo password when asked, to allow changing /etc/hosts)
 
-That is all that is necessary to create a fully-prepared 3-node MarkLogic cluster running on CentOS 6.5 VMs. It takes the name of the project folder as prefix for the host names, to make running projects in parallel easier. If you ran the above in a folder called 'vgtest', it will have created three nodes with the names:
+That is all that is necessary to create a fully-prepared 3-node MarkLogic cluster running on CentOS 7.2 VMs. It takes the name of the project folder as prefix for the host names, to make running projects in parallel easier. If you ran the above in a folder called 'vgtest', it will have created three nodes with the names:
 
 - vgtest-ml1 (cluster master)
 - vgtest-ml2
@@ -88,6 +88,20 @@ To destroy all VMs (maybe to recreate them from scratch):
 
 - `vagrant destroy`
 
+## Re-installing MarkLogic
+
+In the case you'd like to do an upgrade of MarkLogic accross your cluster, you can use:
+
+- `vagrant reload`
+
+It will look for new MarkLogic and MLCP installers, and ask if you'd like to use different ones. After that it will stop all VMs, reload the Vagrantfile, and restart all VMs as usual with vagrant reload. In addition it will, stop MarkLogic services, remove rpm installations, and run the selected installer for MarkLogic. It will also install the new MLCP installer if changed.
+
+To clean-install MarkLogic accross your cluster, and optionally upgrade/downgrade at the same time, you can use:
+
+- `MLV_REMOVE_ML=1 vagrant reload`
+
+That will do the same as above, but additionally flush the MarkLogic data directories on all VMs, and effectively install from scratch. It will also rejoin all hosts in a new cluster.
+
 ## Configuration options
 
 The `project.properties` file contains various settings, amongst others:
@@ -99,7 +113,7 @@ The minimum number of hosts is 1, the maximum is limited mostly by the local res
 
 Note: although you can technically create a cluster of just 2 nodes, 3 nodes is required for proper fail-over. The cluster needs a quorum to vote if a host should be excluded.
 
-The ml_version is used in the `install-ml-centos.sh` script to select the appropriate installer. Code is in place to install versions 5, 6, 7, and 8. The install-ml script refers to rpm by exact name, which includes subversion number, and patch level. Feel free to change it locally to match the exact version you prefer to install.
+The ml_version is used in the `install-ml-centos.sh` script to select the appropriate installer. Code is in place to install versions 5, 6, 7, 8, and 9. The install-ml script refers to latest rpms by exact name, which includes subversion number, and patch level. Use the ml_installer property to override with the exact version you prefer to install.
 
 For the full list of settings see below..
 
@@ -187,14 +201,19 @@ Note: installs JDK 8 currently
 Install MarkLogic Content Pump - defaults to true
 
 Note: installs an MLCP version that matches ml_version, unless an explicit mlcp_installer was specified
+Note: this will force installation of JDK 8, and unzip (unzip required for installation)
 
 ### install_nodejs
 Install Node.js, npm, bower, gulp, forever (globally) - defaults to true
 
+### install_nodejs_lts
+Install Long-Term Support version of Node.js (v6 currently) - defaults to true
+
 ## install_ruby
 Install Ruby - default to true
 
-Note: Ruby is mostly already installed on CentOS, this is just to be certain
+Note: Ruby is mostly already installed on CentOS, this is just to be certain.
+Note: CentOS 7 comes with Ruby v2 out of the box.
 
 ### install_git
 Install Git command-line tools - defaults to true
@@ -204,6 +223,8 @@ Initializes a bare Git repository under /space/projects, along with a user named
 
 ### install_pm2
 Install PM2 NodeJs Process Manager, for running NodeJs services - defaults to true
+
+Note: this will force installation of Git v2.
 
 ### install_httpd
 Install and enable HTTPD service - defaults to true

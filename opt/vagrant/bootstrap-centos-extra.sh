@@ -12,7 +12,7 @@ else
   printf "ml_version=$2\n" > /tmp/$4.project.properties
 fi
 
-# Run the installers
+# Run the installers.
 sudo /opt/vagrant/restore-yum-cache.sh
 sudo /opt/vagrant/update-os.sh $4
 sudo /opt/vagrant/install-ml-centos.sh $4

@@ -16,7 +16,7 @@ os=`cat /etc/redhat-release`
 # Install dependencies required by MarkLogic
 yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64 cyrus-sasl cyrus-sasl-lib cyrus-sasl-md5
 
-if [ -f /lib64/libsasl2.so.3 ]; then
+if [ -f /lib64/libsasl2.so.3 ] && [ ! -f /lib64/libsasl2.so.2 ] ; then
   ln -s /lib64/libsasl2.so.3 /lib64/libsasl2.so.2
 fi
 

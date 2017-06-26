@@ -13,6 +13,9 @@ source /tmp/$1.project.properties
 # Zip/unzip not required for MLCP (provided through Java)
 if [ $install_zip == "true" ]; then
   yum -y install zip unzip
+elif [ $install_mlcp == "true" ]; then
+  # but installation does require unzip
+  yum -y install unzip
 fi
 
 if [ $install_mlcp == "true" ]; then
