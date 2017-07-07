@@ -2,13 +2,36 @@
 
 Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
-Key features:
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+Table of Contents:
+
+- [Key features](#key-features)
+- [Description](#description)
+- [Getting started](#getting-started)
+- [Re-installing MarkLogic](#re-installing-marklogic)
+- [Configuration options](#configuration-options)
+- [Fixing IP issues with public_network](#fixing-ip-issues-with-public_network)
+- [Scaling cluster size up or down](#scaling-cluster-size-up-or-down)
+- [Fixing license issues](#fixing-license-issues)
+- [Pushing source code with git](#pushing-source-code-with-git)
+- [Using bootstrap script without Vagrant](#using-bootstrap-script-without-vagrant)
+- [Using HTTPS with HTTPD](#using-https-with-httpd)
+- [PM2 NodeJS Process Manager](#pm2-nodejs-process-manager)
+- [Fixing issues with Basebox downloads](#fixing-issues-with-basebox-downloads)
+- [Fixing issues with Guest Additions](#fixing-issues-with-guest-additions)
+- [Changing cpu or memory](#changing-cpu-or-memory)
+- [Extending disk space beyond the default 40Gb](#extending-disk-space-beyond-the-default-40gb)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Key features
 
 - Easy creation of VirtualBox VMs
 - Works on Windows, MacOS, and Linux
 - Uses pre-built CentOS Vagrant base boxes
 - Supports MarkLogic 5 up to 9
-- Supports CentOS 5.11 up to 7.2
+- Supports CentOS 5.11 up to 7.3
 - Automatic setup of cluster
 - Also installs MLCP, Java, NodeJS, Ruby, etc
 - Highly configurable
@@ -29,7 +52,7 @@ Note: this project used to depend on chef/centos boxes, but they are no longer a
 You first need to download and install prerequisites and mlvagrant itself:
 
 - Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-  - When using VirtualBox 5.1, make sure to use latest baseboxes, e.g. those for CentOS 6.8 and 7.2
+  - When using VirtualBox 5.1, make sure to use latest baseboxes, e.g. those for CentOS 6.9 and 7.3
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Install the [vagrant-hostmanager](https://github.com/smdahlen/vagrant-hostmanager) plugin:
   - `vagrant plugin install vagrant-hostmanager`
@@ -126,7 +149,7 @@ VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 **IMPORTANT: DON'T CHANGE ONCE YOU HAVE CREATED THE VM'S!!**
 
 ### vm_version
-CentOS base VM version - defaults to 7.2, allowed: 5.11/6.5/6.6/6.7/6.8/7.0/7.1/7.2
+CentOS base VM version - defaults to 7.3, allowed: 5.11/6.5/6.6/6.7/6.8/6.9/7.0/7.1/7.2/7.3
 
 Note: MarkLogic 8+ does not support CentOS 5-
 Note: MarkLogic 9+ does not support CentOS 6-
@@ -181,7 +204,7 @@ Override hard-coded MLCP installers (file is searched in /space/software, or c:\
 ### update_os
 Run full OS updates - defaults to false
 
-Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.8+ resp 7.2+)
+Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.9+ resp 7.3+)
 
 ### install_dev_tools
 Install group "Development tools" - defaults to false
@@ -209,7 +232,7 @@ Install Node.js, npm, bower, gulp, forever (globally) - defaults to true
 ### install_nodejs_lts
 Install Long-Term Support version of Node.js (v6 currently) - defaults to true
 
-## install_ruby
+### install_ruby
 Install Ruby - default to true
 
 Note: Ruby is mostly already installed on CentOS, this is just to be certain.
