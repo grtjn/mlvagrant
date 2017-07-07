@@ -2,9 +2,22 @@
 
 Scripts for bootstrapping a local MarkLogic cluster for development purposes using [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
 
+## Key features
+
+- Easy creation of VirtualBox VMs
+- Works on Windows, MacOS, and Linux
+- Uses pre-built CentOS Vagrant base boxes
+- Supports MarkLogic 5 up to 9
+- Supports CentOS 5.11 up to 7.3
+- Automatic setup of cluster
+- Also installs MLCP, Java, NodeJS, Ruby, etc
+- Highly configurable
+- Scripts can be used for other servers as well
+
+## Table of Contents
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-Table of Contents:
 
 - [Key features](#key-features)
 - [Description](#description)
@@ -24,18 +37,6 @@ Table of Contents:
 - [Extending disk space beyond the default 40Gb](#extending-disk-space-beyond-the-default-40gb)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## Key features
-
-- Easy creation of VirtualBox VMs
-- Works on Windows, MacOS, and Linux
-- Uses pre-built CentOS Vagrant base boxes
-- Supports MarkLogic 5 up to 9
-- Supports CentOS 5.11 up to 7.3
-- Automatic setup of cluster
-- Also installs MLCP, Java, NodeJS, Ruby, etc
-- Highly configurable
-- Scripts can be used for other servers as well
 
 ## Description
 
