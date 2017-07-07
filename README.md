@@ -19,7 +19,6 @@ Scripts for bootstrapping a local MarkLogic cluster for development purposes usi
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Key features](#key-features)
 - [Description](#description)
 - [Getting started](#getting-started)
 - [Re-installing MarkLogic](#re-installing-marklogic)
