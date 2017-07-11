@@ -96,6 +96,12 @@ unless @net_proxy.empty? or Vagrant.has_plugin?("vagrant-proxyconf")
   abort 'To use net_proxy setting, run "vagrant plugin install vagrant-proxyconf" first.'
 end
 
+@do_private_key_path = ENV["MLV_DO_PRIVATE_KEY_PATH"] || @properties["DO_PRIVATE_KEY_PATH"] || "./id_rsa"
+@do_token = ENV["MLV_DO_TOKEN"] || @properties["DO_TOKEN"] || ""
+@do_image = ENV["MLV_DO_IMAGE"] || @properties["DO_IMAGE"] || "centos-6-5-x64"
+@do_region = ENV["MLV_DO_REGION"] || @properties["DO_REGION"] || "sgp1"
+@do_size = ENV["MLV_DO_SIZE"] || @properties["DO_SIZE"] || "1gb"
+
 @vm_name = get_vm_name("{i}")
 
 if @command == "reload"
@@ -257,30 +263,62 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.hostmanager.manage_host = true
     config.hostmanager.include_offline = true
     config.hostmanager.ignore_private_ip = false
-    config.hostmanager.ip_resolver = proc do |machine|
-        result = ""
-        begin
-          machine.communicate.execute("/sbin/ifconfig eth1") do |type, data|
-            result << data if type == :stdout
-          end
-        rescue
-          result = "# NOT-UP"
-          puts "Getting IP from #{ machine.name } ... not running"
-          next
-        end
-        ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)[1]
-        puts "Getting IP from #{ machine.name } ... #{ip}"
-        ip
-    end
+    
 
     # Customize the virtual machine environments
-    config.vm.provider :virtualbox do |vb|
+    config.vm.provider :virtualbox do |vb, override|
         vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
         vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
         # to make sure ssh won't timeout because of a regression in VBox
         vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
         vb.customize ["modifyvm", :id, "--cableconnected2", "on"]
         #vb.gui = true # for debugging
+		
+		config.hostmanager.ip_resolver = proc do |machine|
+			result = ""
+			begin
+			  machine.communicate.execute("/sbin/ifconfig eth1") do |type, data|
+				result << data if type == :stdout
+			  end
+			rescue
+			  result = "# NOT-UP"
+			  puts "Getting IP from #{ machine.name } ... not running"
+			  next
+			end
+			ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)[1]
+			puts "Getting IP from #{ machine.name } ... #{ip}"
+			ip
+		end
+    end
+    
+    config.vm.provider :digital_ocean do |provider, override|
+        override.vm.box = 'digital_ocean'
+        override.vm.box_url = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+		
+		override.ssh.private_key_path = @do_private_key_path
+
+        provider.token = @do_token
+		
+        provider.image = @do_image
+        provider.region = @do_region
+        provider.size = @do_size
+		
+		override.hostmanager.ip_resolver = proc do |machine|
+			result = ""
+			begin
+			  machine.communicate.execute("/sbin/ifconfig eth0") do |type, data|
+				result << data if type == :stdout
+			  end
+			rescue
+			  result = "# NOT-UP"
+			  puts "Getting IP from #{ machine.name } ... not running"
+			  next
+			end
+
+			ip = /^\s*inet .*?(\d+\.\d+\.\d+\.\d+)\s+/.match(result)[1]
+			puts "Getting Digital Ocean IP from #{ machine.name } ... #{ip}"
+			ip
+		end
     end
 
     config.vm.define mastername do |master|
