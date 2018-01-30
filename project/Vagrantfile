@@ -82,6 +82,7 @@ end
 @slave_memory = (ENV["MLV_SLAVE_MEMORY"] || @properties["SLAVE_MEMORY"] || @master_memory.to_s).to_i
 @slave_cpus = (ENV["MLV_SLAVE_CPUS"] || @properties["SLAVE_CPUS"] || @master_cpus.to_s).to_i
 @ml_installer = ENV["MLV_ML_INSTALLER"] || @properties["ML_INSTALLER"] || ""
+@converters_installer = ENV["MLV_CONVERTERS_INSTALLER"] || @properties["CONVERTERS_INSTALLER"] || ""
 @mlcp_installer = ENV["MLV_MLCP_INSTALLER"] || @properties["MLCP_INSTALLER"] || ""
 @public_network = ENV["MLV_PUBLIC_NETWORK"] || @properties["PUBLIC_NETWORK"] || ""
 @priv_net_ip = ENV["MLV_PRIV_NET_IP"] || @properties["PRIV_NET_IP"] || ""
@@ -113,7 +114,7 @@ end
 puts "Loading project #{@project_name}.." unless @command == "global-status"
 
 # check ml installer
-if (@command == "provision" and @ml_installer == "") or (@command == "reload")
+if ((@command == "up" or @command == "provision") and @ml_installer == "") or (@command == "reload")
   os = ""
   os = "-RH*#{@vm_version[0]}" if @ml_version == "8"
 
@@ -146,14 +147,72 @@ if (@command == "provision" and @ml_installer == "") or (@command == "reload")
   end
 
   properties_file = File.read("project.properties")
-  properties_file.gsub!(/[#]?ml_installer=[^\n\r]+/, "ml_installer=#{@ml_installer}")
+  if properties_file.include? "ml_installer="
+    properties_file.gsub!(/[#]?ml_installer=[^\n\r]+/, "ml_installer=#{@ml_installer}")
+  else
+    properties_file = properties_file + %Q{
+##
+# Override hard-coded MarkLogic installers (file is searched in /space/software, or c:\space\software\ on Windows)
+#
+ml_installer=#{@ml_installer}
+}
+  end
   File.write("project.properties", properties_file)
   puts "Persisted ml_installer=#{@ml_installer} in project.properties.."
   puts ""
 end
 
+# check ml converters installer
+if ((@command == "up" or @command == "provision") and @converters_installer == "") or (@command == "reload")
+  os = ""
+  os = "-RH*#{@vm_version[0]}" if @ml_version == "8"
+
+  files = Dir.glob("/space/software/MarkLogicConverters*#{os}-#{@ml_version}.0-*.rpm")
+
+  if files.length > 1
+    i = 1
+    current = nil
+    puts "Please select an installer (hit enter for current):"
+    files.each do |file|
+      print "#{i}. #{file}"
+      if @converters_installer == File.basename(file)
+        print " (current)"
+        current = i
+      end
+      puts ""
+      i = i + 1
+    end
+    response = STDIN.gets.chomp
+    if !response.empty? or current.nil?
+      response = 1 if response.nil?
+      response = [response.to_i, 1].max
+      response = [response, files.length].min
+      @converters_installer = File.basename files[response - 1]
+    end
+  elsif files.length == 1
+    @converters_installer = File.basename files[0]
+  else
+    abort "No suitable MarkLogic Converters installers found in /space/software/!"
+  end
+
+  properties_file = File.read("project.properties")
+  if properties_file.include? 'converters_installer='
+    properties_file.gsub!(/[#]?converters_installer=[^\n\r]+/, "converters_installer=#{@converters_installer}")
+  else
+    properties_file = properties_file + %Q{
+##
+# Override hard-coded MarkLogic Converters installers (file is searched in /space/software, or c:\space\software\ on Windows)
+#
+converters_installer=#{@converters_installer}
+}
+  end
+  File.write("project.properties", properties_file)
+  puts "Persisted converters_installer=#{@converters_installer} in project.properties.."
+  puts ""
+end
+
 # check mlcp installer
-if (@command == "provision" and @mlcp_installer == "") or (@command == "reload")
+if ((@command == "up" or @command == "provision") and @mlcp_installer == "") or (@command == "reload")
 
   version = "-#{@ml_version}.0"
   version = "-1.*-" if @ml_version.to_i < 7
@@ -187,7 +246,16 @@ if (@command == "provision" and @mlcp_installer == "") or (@command == "reload")
   end
 
   properties_file = File.read("project.properties")
-  properties_file.gsub!(/[#]?mlcp_installer=[^\n\r]+/, "mlcp_installer=#{@mlcp_installer}")
+  if properties_file.include? "mlcp_installer="
+    properties_file.gsub!(/[#]?mlcp_installer=[^\n\r]+/, "mlcp_installer=#{@mlcp_installer}")
+  else
+    properties_file = properties_file + %Q{
+##
+# Override hard-coded MarkLogic installers (file is searched in /space/software, or c:\space\software\ on Windows)
+#
+ml_installer=#{@ml_installer}
+}
+  end
   File.write("project.properties", properties_file)
   puts "Persisted mlcp_installer=#{@mlcp_installer} in project.properties.."
   puts ""
