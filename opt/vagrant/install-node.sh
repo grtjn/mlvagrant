@@ -19,7 +19,7 @@ if [ $install_nodejs == "true" ]; then
 
   # get correct nodejs installation
   if [ $install_nodejs_lts == "true" ]; then
-    curl --silent --location https://rpm.nodesource.com/setup_6.x | sudo bash -
+    curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
   else
     curl --silent --location https://rpm.nodesource.com/setup | bash -
   fi
