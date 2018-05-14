@@ -349,6 +349,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--cableconnected1", "on"]
         vb.customize ["modifyvm", :id, "--cableconnected2", "on"]
         #vb.gui = true # for debugging
+        #reset vm clock if vm time varies from host by more than a second to prevent clockskew
+        vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
     end
 
     config.vm.define mastername do |master|
