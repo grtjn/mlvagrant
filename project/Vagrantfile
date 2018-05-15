@@ -16,7 +16,7 @@ VAGRANTFILE_PATH = Dir.getwd + "/" + VAGRANTFILE
 if @command != "global-status" && # skip this for global-status
   !(File.exists? VAGRANTFILE_PATH) && # Vagrantfile must be in a higher dir
     ENV["VAGRANT_DOTFILE_PATH"].nil? # and .vagrant location is not set explicitly
-  
+
   VAGRANT_DOTFILE_PATH = Dir.getwd + "/.vagrant"
   puts "Setting VAGRANT_DOTFILE_PATH to " + VAGRANT_DOTFILE_PATH
   puts ""
@@ -93,6 +93,15 @@ end
 
 @remove_ml = !(ENV["MLV_REMOVE_ML"] || "").empty?
 
+@mlvagrant_dir = "/opt/mlvagrant"
+
+unless File.exists? "#{@mlvagrant_dir}/bootstrap-centos-master.sh"
+  @mlvagrant_dir = "/opt/vagrant"
+  unless File.exists? "#{@mlvagrant_dir}/bootstrap-centos-master.sh"
+    abort "Cannot find mlvagrant bootstrap scripts. Make sure you copied them into /opt/mlvagrant/ on your host."
+  end
+end
+
 unless @net_proxy.empty? or Vagrant.has_plugin?("vagrant-proxyconf")
   abort 'To use net_proxy setting, run "vagrant plugin install vagrant-proxyconf" first.'
 end
@@ -125,13 +134,15 @@ if ((@command == "up" or @command == "provision") and @ml_installer == "") or (@
     current = nil
     puts "Please select an installer (hit enter for current):"
     files.each do |file|
-      print "#{i}. #{file}"
-      if @ml_installer == File.basename(file)
-        print " (current)"
-        current = i
+      unless file =~ /converters/i
+        print "#{i}. #{file}"
+        if @ml_installer == File.basename(file)
+          print " (current)"
+          current = i
+        end
+        puts ""
+        i = i + 1
       end
-      puts ""
-      i = i + 1
     end
     response = STDIN.gets.chomp
     if !response.empty? or current.nil?
@@ -226,7 +237,7 @@ if ((@command == "up" or @command == "provision") and @mlcp_installer == "") or 
     files.each do |file|
       print "#{i}. #{file}"
       if @mlcp_installer == File.basename(file)
-        print " (current)" 
+        print " (current)"
         current = i
       end
       puts ""
@@ -263,6 +274,8 @@ end
 
 if @command == "status" or @command == "up" or @command == "provision"
   puts ""
+  puts "mlvagrant_dir=#{@mlvagrant_dir}"
+  puts ""
   puts "vm_name=#{@vm_name}"
   puts "vm_version=#{@vm_version}"
   puts "ml_version=#{@ml_version}"
@@ -293,7 +306,7 @@ if @command == "status" or @command == "up" or @command == "provision"
     puts "Using DHCP for Private Network"
   end
   puts ""
-  
+
   if @command == "up"
     if @vm_version =~ /^5\./ and (@ml_version.to_i >= 8)
       puts "MarkLogic 8+ NOT supported on CentOS 5-! Try MarkLogic 7-, or CentOS 6+.."
@@ -304,6 +317,8 @@ if @command == "status" or @command == "up" or @command == "provision"
     end
   end
 end
+
+
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -369,16 +384,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           master.vm.network "private_network", type: "dhcp"
         end
         master.vm.synced_folder Dir.getwd, "/vagrant"
-        master.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
+        master.vm.synced_folder @mlvagrant_dir, "/opt/mlvagrant"
+        if @mlvagrant_dir != "/opt/mlvagrant"
+          # legacy support
+          master.vm.synced_folder @mlvagrant_dir, "/opt/vagrant"
+        end
         master.vm.synced_folder "/space/software", "/space/software"
         if @shared_folder_host != "" and  @shared_folder_guest != ""
           master.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
         end
         master.vm.provision :hostmanager
         if @command == "reload"
-          master.vm.provision :shell, :path => "/opt/vagrant/reinstall-marklogic-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name, @remove_ml.to_s], :run => "always"
+          master.vm.provision :shell, :path => "/opt/mlvagrant/reinstall-marklogic-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name, @remove_ml.to_s], :run => "always"
         else
-          master.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name]
+          master.vm.provision :shell, :path => "/opt/mlvagrant/bootstrap-centos-master.sh", :args => ["-v", "#{@ml_version}", mastername, @project_name]
         end
     end
 
@@ -401,16 +420,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                   slave.vm.network "private_network", type: "dhcp"
                 end
                 slave.vm.synced_folder Dir.getwd, "/vagrant"
-                slave.vm.synced_folder "/opt/vagrant", "/opt/vagrant"
+                slave.vm.synced_folder @mlvagrant_dir, "/opt/mlvagrant"
+                if @mlvagrant_dir != "/opt/mlvagrant"
+                  # legacy support
+                  slave.vm.synced_folder @mlvagrant_dir, "/opt/vagrant"
+                end
                 slave.vm.synced_folder "/space/software", "/space/software"
                 if @shared_folder_host != "" and  @shared_folder_guest != ""
                   slave.vm.synced_folder @shared_folder_host, @shared_folder_guest, :create => true
                 end
                 slave.vm.provision :hostmanager
                 if @command == "reload"
-                  slave.vm.provision :shell, :path => "/opt/vagrant/reinstall-marklogic-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name, @remove_ml.to_s], :run => "always"
+                  slave.vm.provision :shell, :path => "/opt/mlvagrant/reinstall-marklogic-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name, @remove_ml.to_s], :run => "always"
                 else
-                  slave.vm.provision :shell, :path => "/opt/vagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name]
+                  slave.vm.provision :shell, :path => "/opt/mlvagrant/bootstrap-centos-extra.sh", :args => ["-v", "#{@ml_version}", mastername, hostname, @project_name]
                 end
             end
         end
