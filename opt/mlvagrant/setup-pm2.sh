@@ -34,11 +34,12 @@ if [ $install_pm2 == "true" ] && [ $install_nodejs == "true" ]; then
     if [[ $os == *"7."* ]]; then
       # use systemd on CentOS 7
       pm2 startup systemd -u pm2 --hp /home/pm2 --no-daemon
+      /bin/systemctl start pm2-pm2
     else
       # use service scripts on CentOS 6-
       pm2 startup centos -u pm2 --hp /home/pm2 --no-daemon
+      /sbin/service pm2-init.sh start
     fi
-    /sbin/service pm2-init.sh start
   else
     echo "WARN: pm2 user doesn't exist yet, could not init nor launch PM2 service!"
     # well, technically, one could run it with root, but that is not recommended

@@ -73,6 +73,9 @@ sleep 5
 if [ -n "${converters_installer}" ]; then
   installer=${converters_installer}
 
+  # Install dependencies required by MarkLogic Converters
+  yum -y install libgcc libgcc.i686 libstdc++ libstdc++.i686
+
   # Run MarkLogic Converters installer
   echo "Installing ML Converters using /space/software/$installer ..."
   rpm -i "/space/software/$installer"

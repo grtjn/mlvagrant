@@ -8,7 +8,7 @@ Scripts for bootstrapping a local MarkLogic cluster for development purposes usi
 - Works on Windows, MacOS, and Linux
 - Uses pre-built CentOS Vagrant base boxes
 - Supports MarkLogic 5 up to 9
-- Supports CentOS 5.11 up to 7.3
+- Supports CentOS 5.11 up to 7.2
 - Automatic setup of cluster
 - Also installs MLCP, Java, NodeJS, Ruby, etc
 - Highly configurable
@@ -52,7 +52,7 @@ Note: this project used to depend on chef/centos boxes, but they are no longer a
 You first need to download and install prerequisites and mlvagrant itself:
 
 - Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-  - When using VirtualBox 5.1, make sure to use latest baseboxes, e.g. those for CentOS 6.9 and 7.3
+  - When using VirtualBox 5.1, make sure to use latest baseboxes, e.g. those for CentOS 6.9 and 7.2
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Install the [vagrant-hostmanager](https://github.com/smdahlen/vagrant-hostmanager) plugin:
   - `vagrant plugin install vagrant-hostmanager`
@@ -70,11 +70,11 @@ You first need to download and install prerequisites and mlvagrant itself:
 - Download mlvagrant:
   - `git clone https://github.com/grtjn/mlvagrant.git`
   - or pull down one of its release zips
-- Create `/opt/vagrant` (**For Windows**: `c:\opt\vagrant`), if it doesn't exist yet:
-  - `sudo mkdir -p /opt/vagrant`
+- Create `/opt/mlvagrant` (**For Windows**: `c:\opt\mlvagrant`), if it doesn't exist yet:
+  - `sudo mkdir -p /opt/mlvagrant`
 - Make sure Vagrant has read/exec access to that dir:
-  - `sudo chmod 755 /opt/vagrant`
-- Copy `mlvagrant/opt/vagrant/*` to `/opt/vagrant/`
+  - `sudo chmod 755 /opt/mlvagrant`
+- Copy `mlvagrant/opt/mlvagrant/*` to `/opt/mlvagrant/`
 
 **IMPORTANT:**
 
@@ -149,7 +149,7 @@ VM naming pattern - defaults to {project_name}-ml{i}, also allowed: {ml_version}
 **IMPORTANT: DON'T CHANGE ONCE YOU HAVE CREATED THE VM'S!!**
 
 ### vm_version
-CentOS base VM version - defaults to 7.3, allowed: 5.11/6.5/6.6/6.7/6.8/6.9/7.0/7.1/7.2/7.3
+CentOS base VM version - defaults to 7.2, allowed: 5.11/6.5/6.6/6.7/6.8/6.9/7.0/7.1/7.2
 
 Note: MarkLogic 8+ does not support CentOS 5-
 Note: MarkLogic 9+ does not support CentOS 6-
@@ -204,7 +204,7 @@ Override hard-coded MLCP installers (file is searched in /space/software, or c:\
 ### update_os
 Run full OS updates - defaults to false
 
-Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.9+ resp 7.3+)
+Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.9+ resp 7.2+)
 
 ### install_dev_tools
 Install group "Development tools" - defaults to false

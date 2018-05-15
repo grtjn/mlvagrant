@@ -6,19 +6,17 @@ if [ -f /vagrant/project.properties ]; then
   sed 's/.*=/\L&/' /vagrant/project.properties > /tmp/$4.project.properties
 elif [ -f project.properties ]; then
   sed 's/.*=/\L&/' project.properties > /tmp/$4.project.properties
-elif [ -f /opt/vagrant/project.properties ]; then
-  sed 's/.*=/\L&/' /opt/vagrant/project.properties > /tmp/$4.project.properties
+elif [ -f /opt/mlvagrant/project.properties ]; then
+  sed 's/.*=/\L&/' /opt/mlvagrant/project.properties > /tmp/$4.project.properties
 else
   printf "ml_version=$2\n" > /tmp/$4.project.properties
 fi
 
-# Run the installers.
-sudo /opt/vagrant/remove-ml.sh $5
-sudo /opt/vagrant/install-ml-centos.sh $4
-if [ "$5" == "true" ]; then
-  sudo /opt/vagrant/setup-ml-master.sh $1 $2 $3
-fi
+yum makecache fast
 
-# Also rerun MLCP installation
-sudo rm -f /usr/local/mlcp
-sudo /opt/vagrant/install-mlcp.sh $4
+# Run the installers.
+sudo /opt/mlvagrant/remove-ml.sh $5
+sudo /opt/mlvagrant/install-ml-centos.sh $4
+if [ "$5" == "true" ]; then
+  sudo /opt/mlvagrant/setup-ml-extra.sh $@
+fi

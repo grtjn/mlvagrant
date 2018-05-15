@@ -10,6 +10,8 @@ install_dev_tools=false
 # Load the normalized project properties.
 source /tmp/$1.project.properties
 
+yum makecache fast
+
 if [ $update_os == "true" ]; then
   yum -y update
 fi

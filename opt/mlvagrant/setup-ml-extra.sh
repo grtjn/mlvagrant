@@ -81,8 +81,8 @@ if [ -f /vagrant/ml_${VERSION}_license.properties ]; then
   source /vagrant/ml_${VERSION}_license.properties
 elif [ -f ml_${VERSION}_license.properties ]; then
   source ml_${VERSION}_license.properties
-elif [ -f /opt/vagrant/ml_${VERSION}_license.properties ]; then
-  source /opt/vagrant/ml_${VERSION}_license.properties
+elif [ -f /opt/mlvagrant/ml_${VERSION}_license.properties ]; then
+  source /opt/mlvagrant/ml_${VERSION}_license.properties
 fi
 
 echo "BOOTSTRAP_HOST is ${BOOTSTRAP_HOST}"
