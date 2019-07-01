@@ -2,7 +2,7 @@
 echo "running $0 $@"
 
 # Defaults
-ml_version=8
+ml_version=10
 install_zip=true
 install_java=true
 install_mlcp=true
@@ -24,11 +24,13 @@ if [ $install_mlcp == "true" ]; then
 
   # Determine installer to use.
   if [ -n "${mlcp_installer}" ]; then
-    installer=${mlcp_installer} 
+    installer=${mlcp_installer}
   elif [ $ml_version == "8" ]; then
     installer=mlcp-8.0.7-bin.zip
   elif [ $ml_version == "9" ]; then
     installer=mlcp-9.0.4-bin.zip
+  elif [ $ml_version == "10" ]; then
+    installer=mlcp-9.0.10-bin.zip
   elif [ $ml_version == "7" ]; then
     installer=mlcp-7.0-6.4-bin.zip
   else
