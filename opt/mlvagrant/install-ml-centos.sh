@@ -14,7 +14,7 @@ os=`cat /etc/redhat-release`
 #echo "transparent_hugepage=never" >> /etc/grub.conf
 
 # Install dependencies required by MarkLogic
-yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64 cyrus-sasl cyrus-sasl-lib cyrus-sasl-md5
+yum -y install glibc.i686 gdb.x86_64 redhat-lsb.x86_64 cyrus-sasl cyrus-sasl-lib cyrus-sasl-md5 gdb lsb-core-amd64 libtool-ltdl.x86_64
 
 if [ -f /lib64/libsasl2.so.3 ] && [ ! -f /lib64/libsasl2.so.2 ] ; then
   ln -s /lib64/libsasl2.so.3 /lib64/libsasl2.so.2
@@ -55,6 +55,13 @@ elif [ $ml_version == "9" ]; then
   else
     # RH6 not supported?
     installer="MarkLogic-9.0-4.x86_64.rpm"
+  fi
+elif [ $ml_version == "10" ]; then
+  if [[ $os == *"7."* ]]; then
+    installer="MarkLogic-10.0-1.x86_64.rpm"
+  else
+    # RH6 not supported?
+    installer="MarkLogic-10.0-1.x86_64.rpm"
   fi
 else
   installer="MarkLogic-7.0-6.12.x86_64.rpm"
