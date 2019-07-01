@@ -8,12 +8,39 @@ install_git_project=true
 # Load the normalized project properties.
 source /tmp/$1.project.properties
 
+os=`cat /etc/redhat-release`
+
 if [ $install_git == "true" ]; then
   # Install git
+  if [[ $os == *"7."* ]]; then
+    yum install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-1.noarch.rpm
+  else
+    yum install http://opensource.wandisco.com/centos/6/git/x86_64/wandisco-git-release-6-1.noarch.rpm
+  fi
   yum -y install git
 fi
 
+# older style git projects, local git repo with hooks
 if [ $install_git_project == "true" ]; then
+
+  if [ hash bower 2> /dev/null ]; then
+    echo 'Bower is already installed'
+  else
+    npm -q install -g bower
+  fi
+
+  if [ hash gulp 2> /dev/null ]; then
+    echo 'Gulp is already installed'
+  else
+    npm -q install -g gulp
+  fi
+
+  if [ hash forever 2> /dev/null ]; then
+    echo 'Forever is already installed'
+  else
+    npm -q install -g forever
+  fi
+
   # create a local git repo
   mkdir -p /space/projects/$1.git
 
