@@ -15,35 +15,17 @@ if [ $install_nodejs == "true" ]; then
   yum remove -y nodejs npm
 
   # curl, as well as epel-release necessary to install nodejs/npm on CentOS 5, no harm otherwise
-  yum -y install curl epel-release 
+  yum -y install curl epel-release
 
   # get correct nodejs installation
   if [ $install_nodejs_lts == "true" ]; then
-    curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
+    curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
   else
     curl --silent --location https://rpm.nodesource.com/setup | bash -
   fi
 
   # install nodejs + potentially necessary build tools
   yum -y install gcc-c++ make nodejs
-
-  if [ hash bower 2> /dev/null ]; then
-    echo 'Bower is already installed'
-  else
-    npm -q install -g bower
-  fi
-
-  if [ hash gulp 2> /dev/null ]; then
-    echo 'Gulp is already installed'
-  else
-    npm -q install -g gulp
-  fi
-
-  if [ hash forever 2> /dev/null ]; then
-    echo 'Forever is already installed'
-  else
-    npm -q install -g forever
-  fi
 
 fi
 
