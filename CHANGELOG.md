@@ -1,5 +1,37 @@
 # Change Log
 
+## [1.0.6](https://github.com/grtjn/mlvagrant/tree/1.0.6) (2019-07-01)
+[Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.5...1.0.6)
+
+**Implemented enhancements:**
+
+- MarkLogic 9.0-4 has separate Converters installer [\#122](https://github.com/grtjn/mlvagrant/issues/122)
+- Support MarkLogic 10 [\#135](https://github.com/grtjn/mlvagrant/issues/135)
+- Remove bower, tomcat and other things that should not be running alongside MarkLogic on the same VM [\#134](https://github.com/grtjn/mlvagrant/issues/134)
+- Upgrade to LTS Node v10  [\#133](https://github.com/grtjn/mlvagrant/issues/133)
+- Add pm2-logrotate to pm2 install [\#130](https://github.com/grtjn/mlvagrant/issues/130)
+- Add centos-6.9 and centos-7.3 baseboxes [\#115](https://github.com/grtjn/mlvagrant/issues/115)
+- Upgrading/installing git 2 [\#108](https://github.com/grtjn/mlvagrant/issues/108)
+
+**Fixed bugs:**
+
+- Trying to install ML 9.0-9 failed dependency [\#132](https://github.com/grtjn/mlvagrant/issues/132)
+- VMs don't attempt to prevent clock skew [\#127](https://github.com/grtjn/mlvagrant/issues/127)
+- Upgrade Vagrant wipes out /opt/vagrant directory [\#126](https://github.com/grtjn/mlvagrant/issues/126)
+- Trying to install MarkLogicConverters-9.0-5.x86\_64 fails - missing libs [\#125](https://github.com/grtjn/mlvagrant/issues/125)
+- re: CentOS 7.3,  vagrant up hangs on SSH step [\#124](https://github.com/grtjn/mlvagrant/issues/124)
+- Attempting Install and Reinstall Throwing Lots of Errors \(See log\) [\#123](https://github.com/grtjn/mlvagrant/issues/123)
+- Centos-7.3 connection timeout [\#116](https://github.com/grtjn/mlvagrant/issues/116)
+
+**Closed issues:**
+
+- Upgrade to LTS Node v8 [\#121](https://github.com/grtjn/mlvagrant/issues/121)
+- Add TOC at top of README [\#117](https://github.com/grtjn/mlvagrant/issues/117)
+
+**Merged pull requests:**
+
+- Prevent clockskew [\#120](https://github.com/grtjn/mlvagrant/pull/120) ([Audarth](https://github.com/Audarth))
+
 ## [1.0.5](https://github.com/grtjn/mlvagrant/tree/1.0.5) (2017-06-26)
 [Full Changelog](https://github.com/grtjn/mlvagrant/compare/1.0.4...1.0.5)
 
@@ -7,7 +39,6 @@
 
 - Setup of pm2 startup script on Centos/RH 7 [\#114](https://github.com/grtjn/mlvagrant/issues/114)
 - Reloading MarkLogic [\#112](https://github.com/grtjn/mlvagrant/issues/112)
-- Upgrading/installing git 2 [\#108](https://github.com/grtjn/mlvagrant/issues/108)
 - Upgrade NodeJS [\#100](https://github.com/grtjn/mlvagrant/issues/100)
 - Dynamically search ML installers [\#53](https://github.com/grtjn/mlvagrant/issues/53)
 

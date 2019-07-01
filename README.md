@@ -7,8 +7,8 @@ Scripts for bootstrapping a local MarkLogic cluster for development purposes usi
 - Easy creation of VirtualBox VMs
 - Works on Windows, MacOS, and Linux
 - Uses pre-built CentOS Vagrant base boxes
-- Supports MarkLogic 5 up to 9
-- Supports CentOS 5.11 up to 7.2
+- Supports MarkLogic 5 up to 10
+- Supports CentOS 5.11 up to 7.2 (7.2 is auto-updated to latest)
 - Automatic setup of cluster
 - Also installs MLCP, Java, NodeJS, Ruby, etc
 - Highly configurable
@@ -52,7 +52,7 @@ Note: this project used to depend on chef/centos boxes, but they are no longer a
 You first need to download and install prerequisites and mlvagrant itself:
 
 - Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-  - When using VirtualBox 5.1, make sure to use latest baseboxes, e.g. those for CentOS 6.9 and 7.2
+  - When using VirtualBox 5.1+, make sure to use latest baseboxes, e.g. those for CentOS 6.9 and 7.2
 - Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
 - Install the [vagrant-hostmanager](https://github.com/smdahlen/vagrant-hostmanager) plugin:
   - `vagrant plugin install vagrant-hostmanager`
@@ -64,8 +64,8 @@ You first need to download and install prerequisites and mlvagrant itself:
   - `sudo mkdir -p /space/software`
 - Make sure Vagrant has write access to that folder:
   - `sudo chmod 777 /space/software`
-- Download [MarkLogic 9 for CentOS](http://developer.marklogic.com/products) (login required)
-- Download [MLCP 9 binaries](http://developer.marklogic.com/products/mlcp)
+- Download [MarkLogic 10 for CentOS](http://developer.marklogic.com/products) (login required)
+- Download [MLCP 10 binaries](http://developer.marklogic.com/products/mlcp)
 - Move MarkLogic rpm, and MLCP zip to `/space/software` (no need to unzip MLCP!)
 - Download mlvagrant:
   - `git clone https://github.com/grtjn/mlvagrant.git`
@@ -130,13 +130,13 @@ That will do the same as above, but additionally flush the MarkLogic data direct
 The `project.properties` file contains various settings, amongst others:
 
 - `nr_hosts`, defaults to 3
-- `ml_version`, defaults to '9'
+- `ml_version`, defaults to '10'
 
 The minimum number of hosts is 1, the maximum is limited mostly by the local resources you have available. Each vm will take 2.5Gb of disk space, and by default (also in the Vagrantfile) takes 2Gb of ram, and 2 CPU cores.
 
 Note: although you can technically create a cluster of just 2 nodes, 3 nodes is required for proper fail-over. The cluster needs a quorum to vote if a host should be excluded.
 
-The ml_version is used in the `install-ml-centos.sh` script to select the appropriate installer. Code is in place to install versions 5, 6, 7, 8, and 9. The install-ml script refers to latest rpms by exact name, which includes subversion number, and patch level. Use the ml_installer property to override with the exact version you prefer to install.
+The ml_version is used in the `install-ml-centos.sh` script to select the appropriate installer. Code is in place to install versions 5, 6, 7, 8, 9, and 10. The install-ml script refers to latest rpms by exact name, which includes subversion number, and patch level. Use the ml_installer property to override with the exact version you prefer to install.
 
 For the full list of settings see below..
 
@@ -153,9 +153,10 @@ CentOS base VM version - defaults to 7.2, allowed: 5.11/6.5/6.6/6.7/6.8/6.9/7.0/
 
 Note: MarkLogic 8+ does not support CentOS 5-
 Note: MarkLogic 9+ does not support CentOS 6-
+Note: MarkLogic 10+ seems to need latest CentOS 7, which is why OS is updated by default since mlvagrant 1.0.6
 
 ### ml_version
-Major MarkLogic release to install - defaults to 9, allowed: 5,6,7,8,9 (installers need to be present)
+Major MarkLogic release to install - defaults to 10, allowed: 5,6,7,8,9,10 (installers need to be present)
 
 ### nr_hosts
 Number of hosts in the cluster - defaults to 3, minimum for failover support
@@ -202,12 +203,12 @@ Override hard-coded MarkLogic installers (file is searched in /space/software, o
 Override hard-coded MLCP installers (file is searched in /space/software, or c:\space\software\ on Windows)
 
 ### update_os
-Run full OS updates - defaults to false
+Run full OS updates - defaults to true
 
-Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.9+ resp 7.2+)
+Note: doing this with CentOS 6.5 or 7.0 will take it up to the very latest minor release (6.9+ resp 7.6+)
 
 ### install_dev_tools
-Install group "Development tools" - defaults to false
+Install group "Development tools" - defaults to true
 
 ### install_zip
 Install zip/unzip - defaults to true
@@ -227,10 +228,10 @@ Note: installs an MLCP version that matches ml_version, unless an explicit mlcp_
 Note: this will force installation of JDK 8, and unzip (unzip required for installation)
 
 ### install_nodejs
-Install Node.js, npm, bower, gulp, forever (globally) - defaults to true
+Install Node.js, npm - defaults to true
 
 ### install_nodejs_lts
-Install Long-Term Support version of Node.js (v6 currently) - defaults to true
+Install Long-Term Support version of Node.js (v10 currently) - defaults to true
 
 ### install_ruby
 Install Ruby - default to true
@@ -243,11 +244,13 @@ Install Git command-line tools - defaults to true
 
 ### install_git_project
 Initializes a bare Git repository under /space/projects, along with a user named {project_name} to use it
+Also installs legacy tooling for it, including bower, gulp, forever (globally)
 
 ### install_pm2
 Install PM2 NodeJs Process Manager, for running NodeJs services - defaults to true
 
 Note: this will force installation of Git v2.
+Note: pm2-logrotate was added by default since 1.0.6
 
 ### install_httpd
 Install and enable HTTPD service - defaults to true
@@ -259,10 +262,11 @@ Install modules and tools for SSL/HTTPS - defaults to true
 
 Note: HTTPD needs to be configured properly to enable HTTPS in there. See [README](#using-https-with-httpd) for details.
 
-### install_tomcat
-Install Tomcat, and enable the service - defaults to true
+### install_tomcat / launch_tomcat
+Install Tomcat - defaults to true
+Enable the service - defaults to false
 
-Note: Tomcat could be pre-installed, but usually isn't enabled by default. This will make sure it is installed, and enabled.
+Note: Tomcat could be pre-installed, but usually isn't enabled by default. This will make sure it is installed. It is not launched by default for security reasons.
 Note: on CentOS 5 you get Tomcat 5 (tomcat5), on CentOS 6 you get Tomcat 6 (tomcat6), on CentOS 7 you get Tomcat 7 (tomcat)
 
 ## Fixing IP issues with public_network
@@ -415,6 +419,21 @@ If you install the vagrant-vbguest plugin, you will get notifications like these
 Usually as long as the Guest Additions version is higher than that of your VirtualBox, you should be good. If it is behind just a little, like GA version 5.1.6 versus VBox Version 5.1.8, you are probably good too. We noticed issues though with older baseboxes that have GA version 5.0.2 in combination with VBox version 5.1.x. You can use the vagrant-vbguest plugin to install the correct Guest Additions if necessary. You can find documentation for its command-line usage here:
 
 https://github.com/dotless-de/vagrant-vbguest#running-as-a-command
+
+In the event Guest Additions and VirtualBox are too much out of synch, you could get a message like this:
+
+```
+[vagrant-ml1] No Virtualbox Guest Additions installation found.
+Updating GuestAdditions skipped.
+```
+
+This seems to be the case when using the centos-7.2 basebox (one of the most recent currently) against VirtualBox 5.2, and typically occurs **after** the first halt/up. In that case you are forced to reinstall them. You can do so easily using:
+
+```
+vagrant vbguest --do install --no-cleanup
+```
+
+Once completed, you should be able to halt/up your vm(s) as pleased without any further issues.
 
 ## Changing cpu or memory
 
