@@ -21,6 +21,7 @@ if [ $install_pm2 == "true" ] && [ $install_nodejs == "true" ]; then
 
   # Install PM2
   npm install -g pm2
+  pm2 install pm2-logrotate
 
   # create pm2 user for Vagrant vm's
   if [ -d /vagrant ] && [ ! id -u pm2 > /dev/null 2>&1 ]; then
