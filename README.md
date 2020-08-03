@@ -78,7 +78,7 @@ You first need to download and install prerequisites and mlvagrant itself:
 
 **IMPORTANT:**
 
-You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/vagrant. You will need an Enterprise (Developer) license for setting up clusters. For project-specific licenses, copy these files next to project.properties first, and edit them there.
+You will also need to get hold of a valid license key. Put the license key info in the appropriate ml license properties file in /opt/mlvagrant. You will need an Enterprise (Developer) license for setting up clusters. For project-specific licenses, copy these files next to project.properties first, and edit them there.
 
 Above steps need to taken only once. For every project you wish to create VMs, you simply take these steps:
 
@@ -323,18 +323,18 @@ The bootstrap scripts contain a few safeguards that should allow running it outs
 
 -	Open an SSH connection to each server, create the folders for installers and scripts, and change ownership to yourself:
   - `sudo mkdir -p /space/software`
-  - `sudo mkdir -p /opt/vagrant`
+  - `sudo mkdir -p /opt/mlvagrant`
   - `sudo chown $USER:sshuser /space/software`
-  - `sudo chown $USER:sshuser /opt/vagrant`
+  - `sudo chown $USER:sshuser /opt/mlvagrant`
 - Download the relevant ML and MLCP installers from http://developer.marklogic.com to your local machine.
 - Download the mlvagrant file from github (git clone or download the release zip)
 - Upload installers, and scripts to the first server using scp:
   - `scp Downloads/MarkLogic-8.0-5.x86_64.rpm <node1 name/ip>:/space/software/`
   - `scp Downloads/mlcp-8.0-5-bin.zip <node1 name/ip>:/space/software/`
-  - `scp <mlvagrant project dir>/opt/vagrant/* <node1 name/ip>:/opt/vagrant/`
-- On first server create files /opt/vagrant/bootstrap-node1.sh, /opt/vagrant/bootstrap-node2.sh, /opt/vagrant/bootstrap-node3.sh, .. (one for each server)
+  - `scp <mlvagrant project dir>/opt/mlvagrant/* <node1 name/ip>:/opt/mlvagrant/`
+- On first server create files /opt/mlvagrant/bootstrap-node1.sh, /opt/mlvagrant/bootstrap-node2.sh, /opt/mlvagrant/bootstrap-node3.sh, .. (one for each server)
 - Note: there is a `bootstrap-server.sh` script that you could take as example.
-- Make them executable: `chmod +x /opt/vagrant/*.sh`
+- Make them executable: `chmod +x /opt/mlvagrant/*.sh`
 - The first should contain:
 
 ```bash
@@ -355,12 +355,12 @@ echo "running $0 $@"
 - From first server 'forward' installers and scripts to all others using scp:
   - `scp /space/software/MarkLogic-8.0-6.x86_64.rpm <nodeN name/ip>:/space/software/`
   - `scp /space/software/mlcp-8.0.6-bin.zip <nodeN name/ip>:/space/software/`
-  - `scp /opt/vagrant/* <nodeN name/ip>:/opt/vagrant/`
+  - `scp /opt/mlvagrant/* <nodeN name/ip>:/opt/mlvagrant/`
 
 Next, initiate MarkLogic bootstrapping on every machine, one by one. This will also by default install MLCP, Java, Git, NodeJS, and other useful tools, and make the MarkLogic instances join together in a cluster:
 
 - On the first server:
-  - `cd /opt/vagrant/`
+  - `cd /opt/mlvagrant/`
   - `./bootstrap-node1.sh`
   - wait till it finished (may take several minutes, this part requires internet access)
   - Note: a few steps might throw warnings or errors, but as long as next step succeeds, continue
